@@ -2,10 +2,7 @@ package com.porejemplo.nube.client;
 
 import java.io.*;
 import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.Scanner;
 
 public class ConsoleClient {
@@ -16,6 +13,7 @@ public class ConsoleClient {
              DataOutputStream out = new DataOutputStream(socket.getOutputStream());
              DataInputStream in = new DataInputStream(socket.getInputStream());) {
             scanner.useDelimiter("\\n");
+//            authenticate();
             useClient(out);
 
         } catch (IOException e) {
@@ -24,6 +22,12 @@ public class ConsoleClient {
             scanner.close();
         }
     }
+
+    private void authenticate(){
+        while (true){
+
+        }
+    };
 
     private void useClient(DataOutputStream outputStream) throws IOException {
         System.out.println("Welcome to Cloud storage client.");
@@ -72,7 +76,9 @@ public class ConsoleClient {
                         System.out.println("Wrong format of the command rmlc");
                         break;
                     }
-                    System.out.println("Command rmlc is under development.");
+                    Path pathToFileToBeRenamed = Paths.get("client_storage", respTokens[1]);
+                    Path pathToRenamedFile = Paths.get("client_storage", respTokens[2]);
+                    Files.move(pathToFileToBeRenamed, pathToRenamedFile);
                     break;
                 case "rmcl":
                     if (respTokens.length > 3) {
@@ -86,7 +92,8 @@ public class ConsoleClient {
                         System.out.println("Wrong format of the command dellc");
                         break;
                     }
-                    System.out.println("Command dellc is under development.");
+                    Path pathToFileToBeDeleted = Paths.get("client_storage", respTokens[1]);
+                    Files.deleteIfExists(pathToFileToBeDeleted);
                     break;
                 case "delcl":
                     if (respTokens.length > 2) {
