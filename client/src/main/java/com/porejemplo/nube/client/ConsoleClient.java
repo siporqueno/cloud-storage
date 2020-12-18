@@ -113,7 +113,8 @@ public class ConsoleClient {
 
     public void sendFile(DataOutputStream out, Path path) throws IOException {
         out.write(15);
-        String fileName = "1.txt";
+//        String fileName = "1.txt";
+        String fileName = path.getFileName().toString();
         int fileNameLength = fileName.length();
         out.writeInt(fileNameLength);
         out.write(fileName.getBytes());
