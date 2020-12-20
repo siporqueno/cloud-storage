@@ -145,13 +145,13 @@ public class ConsoleClient {
             return;
         }
         long fileSize = in.readLong();
-        System.out.println(fileSize);
         Path pathToFileToBeDownloaded = Paths.get("client_storage", fileName);
         try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(pathToFileToBeDownloaded.toFile()))) {
             for (long i = 0; i < fileSize; i++) {
                 bos.write(in.readByte());
             }
         }
+        System.out.println("The file has been successfully downloaded.");
     }
 
 }
