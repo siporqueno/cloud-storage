@@ -13,8 +13,8 @@ public class ConsoleClient {
              DataOutputStream out = new DataOutputStream(socket.getOutputStream());
              DataInputStream in = new DataInputStream(socket.getInputStream());) {
             scanner.useDelimiter("\\n");
-//            authenticate();
-            useClient(out);
+            authenticate();
+            useClient(out, in);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -23,13 +23,15 @@ public class ConsoleClient {
         }
     }
 
-    private void authenticate(){
-        while (true){
+    private void authenticate() {
+        /*while (true) {
 
-        }
-    };
+        }*/
+    }
 
-    private void useClient(DataOutputStream outputStream) throws IOException {
+    ;
+
+    private void useClient(DataOutputStream outputStream, DataInputStream inputStream) throws IOException {
         System.out.println("Welcome to Cloud storage client.");
         while (true) {
             System.out.println("Enter a command or press \\q to quit");
@@ -61,7 +63,7 @@ public class ConsoleClient {
                         System.out.println("Such file does not exist");
                         break;
                     } else {
-                        sendFile(outputStream, path);
+                        uploadFile(outputStream, path);
                         break;
                     }
                 case "dnld":
@@ -69,7 +71,7 @@ public class ConsoleClient {
                         System.out.println("Wrong format of the command dnld");
                         break;
                     }
-                    System.out.println("Command dnld is under development. Waiting for Netty.");
+                    downloadFile(outputStream, inputStream, respTokens[1]);
                     break;
                 case "rmlc":
                     if (respTokens.length > 3) {
@@ -111,9 +113,9 @@ public class ConsoleClient {
         }
     }
 
-    public void sendFile(DataOutputStream out, Path path) throws IOException {
-        out.write(15);
-        String fileName = "1.txt";
+    public void uploadFile(DataOutputStream out, Path path) throws IOException {
+        out.write((byte) 15);
+        String fileName = path.getFileName().toString();
         int fileNameLength = fileName.length();
         out.writeInt(fileNameLength);
         out.write(fileName.getBytes());
@@ -128,4 +130,29 @@ public class ConsoleClient {
         }
         System.out.println("Клиент: файл отправлен");
     }
+
+    public void downloadFile(DataOutputStream out, DataInputStream in, String fileName) throws IOException {
+//        out.write((byte)16);
+        out.writeByte(16);
+        int fileNameLength = fileName.length();
+        out.writeInt(fileNameLength);
+        out.write(fileName.getBytes());
+        byte signalByte = in.readByte();
+        if (signalByte == 16) {
+            System.out.println("Great. Such file found.");
+        } else if (signalByte == 17) {
+            System.out.println("No such file in the Cloud. Please double check file name.");
+            return;
+        }
+        long fileSize = in.readLong();
+        Path pathToFileToBeDownloaded = Paths.get("client_storage", fileName);
+        try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(pathToFileToBeDownloaded.toFile()))) {
+            for (long i = 0; i < fileSize; i++) {
+                bos.write(in.readByte());
+            }
+        }
+        System.out.println("The file has been successfully downloaded.");
+    }
+
 }
+
