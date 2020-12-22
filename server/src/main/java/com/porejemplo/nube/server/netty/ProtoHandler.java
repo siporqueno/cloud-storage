@@ -9,6 +9,8 @@ import io.netty.channel.FileRegion;
 
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -32,6 +34,10 @@ public class ProtoHandler extends ChannelInboundHandlerAdapter {
             if (currentState == State.IDLE) {
                 signalByte = buf.readByte();
                 switch (signalByte) {
+                    case 14:
+                        currentState = State.FILES_LIST;
+                        System.out.println("STATE: Start to obtain file list in server");
+                        break;
                     case 15:
                         currentState = State.NAME_LENGTH;
                         receivedFileLength = 0L;
@@ -120,6 +126,28 @@ public class ProtoHandler extends ChannelInboundHandlerAdapter {
                 ctx.writeAndFlush(region);
                 currentState = State.IDLE;
                 break;
+            }
+
+            if (currentState == State.FILES_LIST) {
+                System.out.println("STATE: Forming and sending to client files list");
+                bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
+                bufOut.writeByte((byte) 14);
+                ctx.writeAndFlush(bufOut);
+                Path pathStrorage = Paths.get("server_storage");
+                StringBuilder stringHelper = new StringBuilder();
+                Files.list(pathStrorage).forEach((p) -> stringHelper.append(p.getFileName().toString()).append(" "));
+                int listLength = stringHelper.length();
+
+                bufOut = ByteBufAllocator.DEFAULT.directBuffer(4);
+                bufOut.writeInt(listLength);
+                ctx.writeAndFlush(bufOut);
+                System.out.println(listLength);
+
+                bufOut = ByteBufAllocator.DEFAULT.directBuffer(stringHelper.length()*2);
+                bufOut.writeCharSequence(stringHelper, StandardCharsets.UTF_8);
+                ctx.writeAndFlush(bufOut);
+                currentState = State.IDLE;
+//                break;
             }
         }
 

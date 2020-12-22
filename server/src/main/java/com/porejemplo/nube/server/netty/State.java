@@ -7,5 +7,6 @@ public enum State {
     FILE_LENGTH,
     FILE,
     VERIFY_FILE_PRESENCE,
-    FILE_DESPATCH
+    FILE_DESPATCH,
+    FILES_LIST
 }
