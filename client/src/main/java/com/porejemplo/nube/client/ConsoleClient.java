@@ -54,7 +54,6 @@ public class ConsoleClient {
                         break;
                     }
                     obtainCloudFileNames(outputStream, inputStream);
-//                    System.out.println("Command lscl is under development. Waiting for Netty.");
                     break;
                 case "upld":
                     if (respTokens.length > 2) {
@@ -90,7 +89,8 @@ public class ConsoleClient {
                         System.out.println("Wrong format of the command rmlc");
                         break;
                     }
-                    System.out.println("Command rmcl is under development. Waiting for Netty.");
+//                    System.out.println("Command rmcl is under development. Waiting for Netty.");
+                    renameFileInCloud(outputStream, inputStream, respTokens[1], respTokens[2]);
                     break;
                 case "dellc":
                     if (respTokens.length > 2) {
@@ -169,7 +169,23 @@ public class ConsoleClient {
             String result = new String(bytes, StandardCharsets.UTF_8);
             System.out.println(result);
         }
+        System.out.println(in.available());
     }
 
+    private void renameFileInCloud(DataOutputStream out, DataInputStream in, String fileName, String newFileName) throws IOException {
+        out.writeByte(18);
+        int fileNameLength = fileName.length();
+        int newFileNameLength = newFileName.length();
+        out.writeInt(fileNameLength);
+        out.writeInt(newFileNameLength);
+        out.write(fileName.getBytes());
+        out.write(newFileName.getBytes());
+        byte signalByte = in.readByte();
+        if (signalByte == 18) {
+            System.out.println("Great. Such file has been found and just renamed");
+        } else if (signalByte == 17) {
+            System.out.println("No such file in the Cloud. Please double check file name.");
+        }
+    }
 }
 
