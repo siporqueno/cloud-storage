@@ -2,7 +2,9 @@ package com.porejemplo.nube.client;
 
 import java.io.*;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class ConsoleClient {
@@ -51,7 +53,7 @@ public class ConsoleClient {
                         System.out.println("Wrong format of the command lscl");
                         break;
                     }
-                    System.out.println("Command lscl is under development. Waiting for Netty.");
+                    obtainCloudFileNames(outputStream, inputStream);
                     break;
                 case "upld":
                     if (respTokens.length > 2) {
@@ -87,7 +89,8 @@ public class ConsoleClient {
                         System.out.println("Wrong format of the command rmlc");
                         break;
                     }
-                    System.out.println("Command rmcl is under development. Waiting for Netty.");
+//                    System.out.println("Command rmcl is under development. Waiting for Netty.");
+                    renameFileInCloud(outputStream, inputStream, respTokens[1], respTokens[2]);
                     break;
                 case "dellc":
                     if (respTokens.length > 2) {
@@ -113,8 +116,9 @@ public class ConsoleClient {
         }
     }
 
-    public void uploadFile(DataOutputStream out, Path path) throws IOException {
-        out.write((byte) 15);
+    private void uploadFile(DataOutputStream out, Path path) throws IOException {
+        out.writeByte(15);
+//        out.write((byte) 15);
         String fileName = path.getFileName().toString();
         int fileNameLength = fileName.length();
         out.writeInt(fileNameLength);
@@ -131,8 +135,7 @@ public class ConsoleClient {
         System.out.println("Клиент: файл отправлен");
     }
 
-    public void downloadFile(DataOutputStream out, DataInputStream in, String fileName) throws IOException {
-//        out.write((byte)16);
+    private void downloadFile(DataOutputStream out, DataInputStream in, String fileName) throws IOException {
         out.writeByte(16);
         int fileNameLength = fileName.length();
         out.writeInt(fileNameLength);
@@ -154,5 +157,35 @@ public class ConsoleClient {
         System.out.println("The file has been successfully downloaded.");
     }
 
+    private void obtainCloudFileNames(DataOutputStream out, DataInputStream in) throws IOException {
+        out.writeByte(14);
+        byte signalByte = in.readByte();
+        if (signalByte == 14) {
+            int listLength = in.readInt();
+            byte[] bytes = new byte[listLength];
+            for (int i = 0; i < listLength; i++) {
+                bytes[i] = (byte) in.read();
+            }
+            String result = new String(bytes, StandardCharsets.UTF_8);
+            System.out.println(result);
+        }
+        System.out.println(in.available());
+    }
+
+    private void renameFileInCloud(DataOutputStream out, DataInputStream in, String fileName, String newFileName) throws IOException {
+        out.writeByte(18);
+        int fileNameLength = fileName.length();
+        int newFileNameLength = newFileName.length();
+        out.writeInt(fileNameLength);
+        out.writeInt(newFileNameLength);
+        out.write(fileName.getBytes());
+        out.write(newFileName.getBytes());
+        byte signalByte = in.readByte();
+        if (signalByte == 18) {
+            System.out.println("Great. Such file has been found and just renamed");
+        } else if (signalByte == 17) {
+            System.out.println("No such file in the Cloud. Please double check file name.");
+        }
+    }
 }
 
