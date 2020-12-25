@@ -12,5 +12,6 @@ public enum State {
     NAME_AND_NEW_NAME_LENGTH,
     NAME_AND_NEW_NAME,
     RENAME_FILE,
-    NEW_NAME_LENGTH
+    NEW_NAME_LENGTH,
+    DELETE_FILE
 }

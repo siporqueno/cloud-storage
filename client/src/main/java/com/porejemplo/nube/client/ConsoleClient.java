@@ -4,14 +4,17 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
-import java.util.Arrays;
 import java.util.Scanner;
 
 public class ConsoleClient {
-    private Scanner scanner = new Scanner(System.in);
+
+    public static final int PORT = 8189;
+    public static final String HOST = "localhost";
+
+    private final Scanner scanner = new Scanner(System.in);
 
     public ConsoleClient() {
-        try (Socket socket = new Socket("localhost", 8189);
+        try (Socket socket = new Socket(HOST, PORT);
              DataOutputStream out = new DataOutputStream(socket.getOutputStream());
              DataInputStream in = new DataInputStream(socket.getInputStream());) {
             scanner.useDelimiter("\\n");
@@ -105,7 +108,7 @@ public class ConsoleClient {
                         System.out.println("Wrong format of the command delcl");
                         break;
                     }
-                    System.out.println("Command delcl is under development. Waiting for Netty.");
+                    deleteFileInCloud(outputStream, inputStream, respTokens[1]);
                     break;
                 case "\\q":
                     break;
@@ -118,7 +121,6 @@ public class ConsoleClient {
 
     private void uploadFile(DataOutputStream out, Path path) throws IOException {
         out.writeByte(15);
-//        out.write((byte) 15);
         String fileName = path.getFileName().toString();
         int fileNameLength = fileName.length();
         out.writeInt(fileNameLength);
@@ -183,6 +185,19 @@ public class ConsoleClient {
         byte signalByte = in.readByte();
         if (signalByte == 18) {
             System.out.println("Great. Such file has been found and just renamed");
+        } else if (signalByte == 17) {
+            System.out.println("No such file in the Cloud. Please double check file name.");
+        }
+    }
+
+    private void deleteFileInCloud(DataOutputStream out, DataInputStream in, String fileName) throws IOException {
+        out.writeByte(19);
+        int fileNameLength = fileName.length();
+        out.writeInt(fileNameLength);
+        out.write(fileName.getBytes());
+        byte signalByte = in.readByte();
+        if (signalByte == 19) {
+            System.out.println("Great. Such file has been found and just deleted");
         } else if (signalByte == 17) {
             System.out.println("No such file in the Cloud. Please double check file name.");
         }

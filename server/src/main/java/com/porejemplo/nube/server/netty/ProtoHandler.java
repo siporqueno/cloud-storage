@@ -40,7 +40,6 @@ public class ProtoHandler extends ChannelInboundHandlerAdapter {
         ByteBuf m = (ByteBuf) msg;
         buf.writeBytes(m);
         m.release();
-//        ByteBuf bufOut = null;
 
         while (buf.readableBytes() > 0) {
             if (currentState == State.IDLE) {
@@ -64,6 +63,10 @@ public class ProtoHandler extends ChannelInboundHandlerAdapter {
 //                        currentState = State.NAME_AND_NEW_NAME_LENGTH;
                         currentState = State.NAME_LENGTH;
                         System.out.println("STATE: Start of file renaming");
+                        break;
+                    case 19:
+                        currentState = State.NAME_LENGTH;
+                        System.out.println("STATE: Start of file deleting");
                         break;
                     default:
                         System.out.println("ERROR: Invalid first byte - " + signalByte);
@@ -109,7 +112,7 @@ public class ProtoHandler extends ChannelInboundHandlerAdapter {
                     if (signalByte == 15) {
                         out = new BufferedOutputStream(new FileOutputStream(path.toFile()));
                         currentState = State.FILE_LENGTH;
-                    } else if (signalByte == 16) {
+                    } else if (signalByte == 16 || signalByte == 19) {
                         currentState = State.VERIFY_FILE_PRESENCE;
                     }
                 } else break;
@@ -158,11 +161,17 @@ public class ProtoHandler extends ChannelInboundHandlerAdapter {
                 if (Files.exists(path)) {
                     bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
                     if (signalByte == 16) {
+                        System.out.println("File name verified");
                         bufOut.writeByte((byte) 16);
                         ctx.writeAndFlush(bufOut);
                         currentState = State.FILE_DESPATCH;
-                    } else if (signalByte == 18) currentState = State.RENAME_FILE;
-                    System.out.println("File name verified");
+                    } else if (signalByte == 18) {
+                        System.out.println("File name verified");
+                        currentState = State.RENAME_FILE;
+                    } else if (signalByte == 19) {
+                        System.out.println("File name verified");
+                        currentState = State.DELETE_FILE;
+                    }
                 } else {
                     bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
                     bufOut.writeByte((byte) 17);
@@ -215,22 +224,25 @@ public class ProtoHandler extends ChannelInboundHandlerAdapter {
                 currentState = State.IDLE;
                 break;
             }
-        }
 
-        if (bufOut.readableBytes() == 0) {
-            bufOut.release();
-            bufOut = null;
+            if (currentState == State.DELETE_FILE) {
+                System.out.println("STATE: File deleting");
+                Files.delete(path);
+                bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
+                bufOut.writeByte((byte) 19);
+                ctx.writeAndFlush(bufOut);
+                currentState = State.IDLE;
+                break;
+            }
         }
-
-        /*if (buf.readableBytes() == 0) {
-            buf.release();
-        }*/
     }
 
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
         buf.release();
         buf = null;
+        bufOut.release();
+        bufOut = null;
     }
 
     @Override
