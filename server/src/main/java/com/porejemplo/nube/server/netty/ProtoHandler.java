@@ -26,11 +26,21 @@ public class ProtoHandler extends ChannelInboundHandlerAdapter {
     private Path path;
     private Path newPath;
     byte signalByte;
+    private ByteBuf buf;
+    private ByteBuf bufOut;
+
+    @Override
+    public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+        buf = ByteBufAllocator.DEFAULT.directBuffer(1);
+        bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
+    }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        ByteBuf buf = (ByteBuf) msg;
-        ByteBuf bufOut = null;
+        ByteBuf m = (ByteBuf) msg;
+        buf.writeBytes(m);
+        m.release();
+//        ByteBuf bufOut = null;
 
         while (buf.readableBytes() > 0) {
             if (currentState == State.IDLE) {
@@ -68,7 +78,7 @@ public class ProtoHandler extends ChannelInboundHandlerAdapter {
                     nameLength = buf.readInt();
                     if (signalByte == 18) currentState = State.NEW_NAME_LENGTH;
                     else currentState = State.NAME;
-                }
+                } else break;
             }
 
             if (currentState == State.NEW_NAME_LENGTH) {
@@ -77,7 +87,7 @@ public class ProtoHandler extends ChannelInboundHandlerAdapter {
                     System.out.println("STATE: Getting new filename length");
                     newNameLength = buf.readInt();
                     currentState = State.NAME_AND_NEW_NAME;
-                }
+                } else break;
             }
 
             /*if (currentState == State.NAME_AND_NEW_NAME_LENGTH) {
@@ -102,7 +112,7 @@ public class ProtoHandler extends ChannelInboundHandlerAdapter {
                     } else if (signalByte == 16) {
                         currentState = State.VERIFY_FILE_PRESENCE;
                     }
-                }
+                } else break;
             }
 
             if (currentState == State.NAME_AND_NEW_NAME) {
@@ -118,7 +128,7 @@ public class ProtoHandler extends ChannelInboundHandlerAdapter {
                     newPath = Paths.get("server_storage", new String(newFileName));
 
                     currentState = State.VERIFY_FILE_PRESENCE;
-                }
+                } else break;
             }
 
             if (currentState == State.FILE_LENGTH) {
@@ -126,7 +136,7 @@ public class ProtoHandler extends ChannelInboundHandlerAdapter {
                     fileLength = buf.readLong();
                     System.out.println("STATE: File length received - " + fileLength);
                     currentState = State.FILE;
-                }
+                } else break;
             }
 
             if (currentState == State.FILE) {
@@ -151,9 +161,7 @@ public class ProtoHandler extends ChannelInboundHandlerAdapter {
                         bufOut.writeByte((byte) 16);
                         ctx.writeAndFlush(bufOut);
                         currentState = State.FILE_DESPATCH;
-                    } else //                        bufOut.writeByte((byte) 18);
-                        //                        ctx.writeAndFlush(bufOut);
-                        if (signalByte == 18) currentState = State.RENAME_FILE;
+                    } else if (signalByte == 18) currentState = State.RENAME_FILE;
                     System.out.println("File name verified");
                 } else {
                     bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
@@ -209,9 +217,20 @@ public class ProtoHandler extends ChannelInboundHandlerAdapter {
             }
         }
 
-        if (buf.readableBytes() == 0) {
-            buf.release();
+        if (bufOut.readableBytes() == 0) {
+            bufOut.release();
+            bufOut = null;
         }
+
+        /*if (buf.readableBytes() == 0) {
+            buf.release();
+        }*/
+    }
+
+    @Override
+    public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
+        buf.release();
+        buf = null;
     }
 
     @Override
