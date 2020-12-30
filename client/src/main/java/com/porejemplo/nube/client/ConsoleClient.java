@@ -1,10 +1,20 @@
 package com.porejemplo.nube.client;
 
+import com.porejemplo.nube.client.service.DownloadService;
+import com.porejemplo.nube.client.service.IODownloadService;
+import com.porejemplo.nube.client.service.IOUploadService;
+import com.porejemplo.nube.client.service.UploadService;
+import com.porejemplo.nube.common.ArgumentException;
+import com.porejemplo.nube.common.Command;
+
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class ConsoleClient {
 
@@ -13,10 +23,16 @@ public class ConsoleClient {
 
     private final Scanner scanner = new Scanner(System.in);
 
+    private UploadService uploadService;
+    private DownloadService downloadService;
+
     public ConsoleClient() {
         try (Socket socket = new Socket(HOST, PORT);
              DataOutputStream out = new DataOutputStream(socket.getOutputStream());
              DataInputStream in = new DataInputStream(socket.getInputStream());) {
+
+            uploadService = new IOUploadService(out);
+            downloadService = new IODownloadService(out, in);
             scanner.useDelimiter("\\n");
             authenticate();
             useClient(out, in);
@@ -42,6 +58,9 @@ public class ConsoleClient {
             System.out.println("Enter a command or press \\q to quit");
             String response = scanner.next();
             String[] respTokens = response.split(" ");
+            Command command = Command.valueOf(respTokens[0]);
+            List<String> arguments = Arrays.stream(respTokens).skip(1).collect(Collectors.toList());
+
             switch (respTokens[0]) {
                 case "lslc":
                     if (respTokens.length > 1) {
@@ -92,7 +111,6 @@ public class ConsoleClient {
                         System.out.println("Wrong format of the command rmlc");
                         break;
                     }
-//                    System.out.println("Command rmcl is under development. Waiting for Netty.");
                     renameFileInCloud(outputStream, inputStream, respTokens[1], respTokens[2]);
                     break;
                 case "dellc":
@@ -116,6 +134,50 @@ public class ConsoleClient {
                     System.out.println("Such command does not exist.");
             }
             if (response.equals("\\q")) break;
+        }
+    }
+
+    private void handle(DataOutputStream outputStream, DataInputStream inputStream, Command command, List<String> arguments) throws ArgumentException, IOException {
+        command.checkArguments(arguments);
+        switch (command) {
+            case LSLC:
+                Path pathStrorage = Paths.get("client_storage");
+                Files.list(pathStrorage).forEach((p) -> System.out.println(p.getFileName()));
+                break;
+            case LSCL:
+                obtainCloudFileNames(outputStream, inputStream);
+                break;
+            case UPLD:
+                Path path = Paths.get("client_storage", arguments.get(0));
+                if (Files.notExists(path, LinkOption.NOFOLLOW_LINKS)) {
+                    System.out.println("Such file does not exist");
+                    break;
+                } else {
+                    uploadService.upload(path);
+                    break;
+                }
+            case DNLD:
+                downloadService.download(Paths.get("server_storage", arguments.get(0)));
+                break;
+            case RMLC:
+                Path pathToFileToBeRenamed = Paths.get("client_storage", arguments.get(0));
+                Path pathToRenamedFile = Paths.get("client_storage", arguments.get(1));
+                Files.move(pathToFileToBeRenamed, pathToRenamedFile);
+                break;
+            case RMCL:
+                renameFileInCloud(outputStream, inputStream, arguments.get(0), arguments.get(1));
+                break;
+            case DELLC:
+                Path pathToFileToBeDeleted = Paths.get("client_storage", arguments.get(0));
+                Files.deleteIfExists(pathToFileToBeDeleted);
+                break;
+            case DELCL:
+                deleteFileInCloud(outputStream, inputStream, arguments.get(0));
+                break;
+            case QUIT:
+                break;
+            default:
+                System.out.println("Such command does not exist.");
         }
     }
 
@@ -201,6 +263,10 @@ public class ConsoleClient {
         } else if (signalByte == 17) {
             System.out.println("No such file in the Cloud. Please double check file name.");
         }
+    }
+
+    public static void main(String[] args) {
+        new ConsoleClient();
     }
 }
 
