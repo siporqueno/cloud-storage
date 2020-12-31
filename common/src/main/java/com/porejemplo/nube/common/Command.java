@@ -12,7 +12,7 @@ public enum Command {
     RMCL("rmcl", "rmcl file_name_one file_name_two\nRenames file file_name_one as file_name_two in the cloud storage", 2, (byte) 18),
     DELLC("dellc", "dellc file_name\nDeletes file file_name in the local storage", 1, (byte) -1),
     DELCL("delcl", "delcl file_name\nDeletes file file_name in the cloud storage", 1, (byte) 19),
-    QUIT("\\q", "\\q\nExit", 0, (byte) -1);
+    EXIT("exit", "exit\nExits the client.", 0, (byte) -1);
 
     private final String name;
     private final String description;
