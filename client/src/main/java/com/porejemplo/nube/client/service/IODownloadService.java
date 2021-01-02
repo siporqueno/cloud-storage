@@ -30,6 +30,7 @@ public class IODownloadService implements DownloadService {
             return false;
         }
         long fileSize = in.readLong();
+        System.out.println(fileSize);
         Path pathToFileToBeDownloaded = Paths.get("client_storage", fileName);
         try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(pathToFileToBeDownloaded.toFile()))) {
             for (long i = 0; i < fileSize; i++) {

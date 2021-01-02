@@ -28,7 +28,10 @@ public class CommandHandler {
         switch (command) {
             case LSLC:
                 Path pathStrorage = Paths.get("client_storage");
-                Files.list(pathStrorage).forEach((p) -> System.out.println(p.getFileName()));
+                StringBuilder stringHelper = new StringBuilder();
+                stringHelper.setLength(0);
+                Files.list(pathStrorage).forEach((p) -> stringHelper.append(p.getFileName()).append(" "));
+                System.out.println(stringHelper);
                 break;
             case LSCL:
                 obtainCloudFileNames(outputStream, inputStream);
@@ -73,9 +76,9 @@ public class CommandHandler {
     }
 
     private void obtainCloudFileNames(DataOutputStream out, DataInputStream in) throws IOException {
-        out.writeByte(14);
+        out.writeByte(Command.LSCL.getSignalByte());
         byte signalByte = in.readByte();
-        if (signalByte == 14) {
+        if (signalByte == Command.LSCL.getSignalByte()) {
             int listLength = in.readInt();
             byte[] bytes = new byte[listLength];
             for (int i = 0; i < listLength; i++) {
@@ -84,11 +87,10 @@ public class CommandHandler {
             String result = new String(bytes, StandardCharsets.UTF_8);
             System.out.println(result);
         }
-        System.out.println(in.available());
     }
 
     private void renameFileInCloud(DataOutputStream out, DataInputStream in, String fileName, String newFileName) throws IOException {
-        out.writeByte(18);
+        out.writeByte(Command.RMCL.getSignalByte());
         int fileNameLength = fileName.length();
         int newFileNameLength = newFileName.length();
         out.writeInt(fileNameLength);
@@ -96,7 +98,7 @@ public class CommandHandler {
         out.write(fileName.getBytes());
         out.write(newFileName.getBytes());
         byte signalByte = in.readByte();
-        if (signalByte == 18) {
+        if (signalByte == Command.RMCL.getSignalByte()) {
             System.out.println("Great. Such file has been found and just renamed");
         } else if (signalByte == 17) {
             System.out.println("No such file in the Cloud. Please double check file name.");
@@ -104,12 +106,12 @@ public class CommandHandler {
     }
 
     private void deleteFileInCloud(DataOutputStream out, DataInputStream in, String fileName) throws IOException {
-        out.writeByte(19);
+        out.writeByte(Command.DELCL.getSignalByte());
         int fileNameLength = fileName.length();
         out.writeInt(fileNameLength);
         out.write(fileName.getBytes());
         byte signalByte = in.readByte();
-        if (signalByte == 19) {
+        if (signalByte == Command.DELCL.getSignalByte()) {
             System.out.println("Great. Such file has been found and just deleted");
         } else if (signalByte == 17) {
             System.out.println("No such file in the Cloud. Please double check file name.");

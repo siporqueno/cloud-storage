@@ -1,5 +1,6 @@
 package com.porejemplo.nube.common;
 
+import java.util.Arrays;
 import java.util.List;
 
 public enum Command {
@@ -35,5 +36,9 @@ public enum Command {
             throw new ArgumentException(String.format("Wrong format of the command %s", name));
         }
         return true;
+    }
+
+    public static Command findCommandBySignalByte(byte receivedSignalByte) throws Exception {
+        return Arrays.stream(Command.values()).filter(c -> c.signalByte == receivedSignalByte).findFirst().orElseThrow(() -> new Exception("Oops"));
     }
 }
