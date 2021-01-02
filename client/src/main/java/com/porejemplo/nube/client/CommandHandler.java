@@ -12,6 +12,7 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CommandHandler {
 
@@ -27,11 +28,11 @@ public class CommandHandler {
         command.checkArguments(arguments);
         switch (command) {
             case LSLC:
-                Path pathStrorage = Paths.get("client_storage");
-                StringBuilder stringHelper = new StringBuilder();
-                stringHelper.setLength(0);
-                Files.list(pathStrorage).forEach((p) -> stringHelper.append(p.getFileName()).append(" "));
-                System.out.println(stringHelper);
+                Path pathStorage = Paths.get("client_storage");
+                String fileNamesString = Files.list(pathStorage)
+                        .map(path -> path.getFileName().toString())
+                        .collect(Collectors.joining(" "));
+                System.out.println(fileNamesString);
                 break;
             case LSCL:
                 obtainCloudFileNames(outputStream, inputStream);
