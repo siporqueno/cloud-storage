@@ -21,7 +21,7 @@ public class ProtoServer {
                         @Override
                         public void initChannel(SocketChannel ch) {
                             ch.pipeline()
-                                    .addLast(new ProtoHandler());
+                                    .addLast(new MainHandler());
                         }
                     });
             ChannelFuture f = b.bind(8189).sync();

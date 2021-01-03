@@ -10,9 +10,9 @@ import java.nio.file.Paths;
 
 public class UploadCommandReceivedState implements State {
 
-    private final ProtoHandler pH;
+    private final MainHandler pH;
 
-    public UploadCommandReceivedState(ProtoHandler pH) {
+    public UploadCommandReceivedState(MainHandler pH) {
         this.pH = pH;
     }
 

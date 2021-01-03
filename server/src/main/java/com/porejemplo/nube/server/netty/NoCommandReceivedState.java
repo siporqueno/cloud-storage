@@ -6,9 +6,9 @@ import io.netty.channel.ChannelHandlerContext;
 
 public class NoCommandReceivedState implements State {
 
-    private final ProtoHandler pH;
+    private final MainHandler pH;
 
-    public NoCommandReceivedState(ProtoHandler pH) {
+    public NoCommandReceivedState(MainHandler pH) {
         this.pH = pH;
     }
 

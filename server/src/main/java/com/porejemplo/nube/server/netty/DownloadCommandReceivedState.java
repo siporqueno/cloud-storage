@@ -13,9 +13,9 @@ import java.nio.file.Paths;
 
 public class DownloadCommandReceivedState implements State {
 
-    private final ProtoHandler pH;
+    private final MainHandler pH;
 
-    public DownloadCommandReceivedState(ProtoHandler pH) {
+    public DownloadCommandReceivedState(MainHandler pH) {
         this.pH = pH;
     }
 

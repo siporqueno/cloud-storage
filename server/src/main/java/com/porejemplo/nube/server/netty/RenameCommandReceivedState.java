@@ -11,9 +11,9 @@ import java.nio.file.Paths;
 
 public class RenameCommandReceivedState implements State {
 
-    private final ProtoHandler pH;
+    private final MainHandler pH;
 
-    public RenameCommandReceivedState(ProtoHandler pH) {
+    public RenameCommandReceivedState(MainHandler pH) {
         this.pH = pH;
     }
 

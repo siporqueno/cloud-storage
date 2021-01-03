@@ -11,9 +11,9 @@ import java.nio.file.Paths;
 
 public class DeleteCommandReceivedState implements State {
 
-    private final ProtoHandler pH;
+    private final MainHandler pH;
 
-    public DeleteCommandReceivedState(ProtoHandler pH) {
+    public DeleteCommandReceivedState(MainHandler pH) {
         this.pH = pH;
     }
 

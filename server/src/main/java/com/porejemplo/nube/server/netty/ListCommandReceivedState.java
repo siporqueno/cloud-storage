@@ -14,9 +14,9 @@ import java.util.stream.Collectors;
 
 public class ListCommandReceivedState implements State {
 
-    private final ProtoHandler pH;
+    private final MainHandler pH;
 
-    public ListCommandReceivedState(ProtoHandler pH) {
+    public ListCommandReceivedState(MainHandler pH) {
         this.pH = pH;
     }
 
