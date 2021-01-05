@@ -14,10 +14,10 @@ import java.util.stream.Collectors;
 
 public class ListCommandReceivedState implements State {
 
-    private final MainHandler pH;
+    private final MainHandler mH;
 
-    public ListCommandReceivedState(MainHandler pH) {
-        this.pH = pH;
+    public ListCommandReceivedState(MainHandler mH) {
+        this.mH = mH;
     }
 
     @Override
@@ -28,28 +28,28 @@ public class ListCommandReceivedState implements State {
     @Override
     public boolean processCommand(ChannelHandlerContext ctx) throws IOException {
 
-        if (pH.currentPhase == Phase.FILES_LIST) {
+        if (mH.currentPhase == Phase.FILES_LIST) {
             System.out.println("STATE: Forming and sending to client files list");
-            pH.bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
-            pH.bufOut.writeByte(Command.LSCL.getSignalByte());
-            ctx.writeAndFlush(pH.bufOut);
-            Path pathStrorage = Paths.get("server_storage");
-            String fileNamesString=Files.list(pathStrorage)
+            mH.bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
+            mH.bufOut.writeByte(Command.LSCL.getSignalByte());
+            ctx.writeAndFlush(mH.bufOut);
+            Path pathStorage = Paths.get("server_storage");
+            String fileNamesString=Files.list(pathStorage)
                     .map(path -> path.getFileName().toString())
                     .collect(Collectors.joining(" "));
             int listLength = fileNamesString.length();
-            pH.bufOut = ByteBufAllocator.DEFAULT.directBuffer(4);
-            pH.bufOut.writeInt(listLength);
-            ctx.writeAndFlush(pH.bufOut);
+            mH.bufOut = ByteBufAllocator.DEFAULT.directBuffer(4);
+            mH.bufOut.writeInt(listLength);
+            ctx.writeAndFlush(mH.bufOut);
             System.out.println(listLength);
 
-            pH.bufOut = ByteBufAllocator.DEFAULT.directBuffer(listLength * 2);
-            pH.bufOut.writeCharSequence(fileNamesString, StandardCharsets.UTF_8);
-            ctx.writeAndFlush(pH.bufOut);
-            pH.currentPhase = Phase.IDLE;
+            mH.bufOut = ByteBufAllocator.DEFAULT.directBuffer(listLength * 2);
+            mH.bufOut.writeCharSequence(fileNamesString, StandardCharsets.UTF_8);
+            ctx.writeAndFlush(mH.bufOut);
+            mH.currentPhase = Phase.IDLE;
         }
 
-        pH.currentState = pH.noCommandReceivedState;
+        mH.currentState = mH.noCommandReceivedState;
         return true;
     }
 }

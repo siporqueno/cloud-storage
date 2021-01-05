@@ -17,8 +17,8 @@ public class ConsoleClient {
     public static final int PORT = 8189;
     public static final String HOST = "localhost";
 
-    private final String username = "user";
-    private final String password = "pass";
+    private final String mockUsername = "user";
+    private final String mockPassword = "pass";
 
     private final Scanner scanner = new Scanner(System.in);
 
@@ -31,7 +31,7 @@ public class ConsoleClient {
 
             commandHandler = new CommandHandler(new IOUploadService(out), new IODownloadService(out, in));
             scanner.useDelimiter("\\n");
-            authenticate();
+            authenticate(out, in);
             runClient(out, in);
 
         } catch (IOException e) {
@@ -41,17 +41,18 @@ public class ConsoleClient {
         }
     }
 
-    private void authenticate() {
+    private void authenticate(DataOutputStream out, DataInputStream in) throws IOException {
         String receivedUsername;
         String receivedPassword;
         while (true) {
             receivedUsername = receiveConsoleInput("username");
             receivedPassword = receiveConsoleInput("password");
-            if (receivedUsername.equals(username) && receivedPassword.equals(password)) {
-                // It is a place for a method to check the credentials with the server.
+            /*if (receivedUsername.equals(mockUsername) && receivedPassword.equals(mockPassword)) {
                 break;
             } else
-                System.out.println("Your username and/or password are wrong. Please try again.");
+                System.out.println("Your username and/or password are wrong. Please try again.");*/
+
+            if (areUsernameAndPasswordCorrectForCloud(out, in, receivedUsername, receivedPassword)) break;
         }
     }
 
@@ -74,6 +75,24 @@ public class ConsoleClient {
             return true;
         }
         return false;
+    }
+
+    private boolean areUsernameAndPasswordCorrectForCloud(DataOutputStream out, DataInputStream in, String username, String password) throws IOException {
+        out.writeByte(Command.LOGIN.getSignalByte());
+        int usernameLength = username.length();
+        int passwordLength = password.length();
+        out.writeInt(usernameLength);
+        out.writeInt(passwordLength);
+        out.write(username.getBytes());
+        out.write(password.getBytes());
+        byte signalByte = in.readByte();
+        if (signalByte == Command.LOGIN.getSignalByte()) {
+            System.out.println("You have successfully logged in. Enjoy!");
+        } else if (signalByte == Command.LOGIN.getFailureByte()) {
+            System.out.println("Your username and/or password for the Cloud are wrong. Please try again.");
+            return false;
+        }
+        return true;
     }
 
     private void runClient(DataOutputStream outputStream, DataInputStream inputStream) throws IOException {

@@ -11,10 +11,10 @@ import java.nio.file.Paths;
 
 public class DeleteCommandReceivedState implements State {
 
-    private final MainHandler pH;
+    private final MainHandler mH;
 
-    public DeleteCommandReceivedState(MainHandler pH) {
-        this.pH = pH;
+    public DeleteCommandReceivedState(MainHandler mH) {
+        this.mH = mH;
     }
 
     @Override
@@ -25,51 +25,51 @@ public class DeleteCommandReceivedState implements State {
     @Override
     public boolean processCommand(ChannelHandlerContext ctx) throws IOException {
 
-        if (pH.currentPhase == Phase.NAME_LENGTH) {
+        if (mH.currentPhase == Phase.NAME_LENGTH) {
             System.out.println("inside if NAME_LENGTH ");
-            if (pH.buf.readableBytes() >= 4) {
+            if (mH.buf.readableBytes() >= 4) {
                 System.out.println("STATE: Getting filename length");
-                pH.nameLength = pH.buf.readInt();
-                pH.currentPhase = Phase.NAME;
+                mH.nameLength = mH.buf.readInt();
+                mH.currentPhase = Phase.NAME;
             } else return false;
         }
 
-        if (pH.currentPhase == Phase.NAME) {
-            if (pH.buf.readableBytes() >= pH.nameLength) {
-                byte[] fileName = new byte[pH.nameLength];
-                pH.buf.readBytes(fileName);
+        if (mH.currentPhase == Phase.NAME) {
+            if (mH.buf.readableBytes() >= mH.nameLength) {
+                byte[] fileName = new byte[mH.nameLength];
+                mH.buf.readBytes(fileName);
                 System.out.println("STATE: Filename received - " + new String(fileName, "UTF-8"));
-                pH.path = Paths.get("server_storage", new String(fileName));
-                pH.currentPhase = Phase.VERIFY_FILE_PRESENCE;
+                mH.path = Paths.get("server_storage", new String(fileName));
+                mH.currentPhase = Phase.VERIFY_FILE_PRESENCE;
             } else return false;
         }
 
-        if (pH.currentPhase == Phase.VERIFY_FILE_PRESENCE) {
+        if (mH.currentPhase == Phase.VERIFY_FILE_PRESENCE) {
             System.out.println("STATE: File presence verification ");
-            if (Files.exists(pH.path)) {
+            if (Files.exists(mH.path)) {
                 System.out.println("File name verified");
-                pH.currentPhase = Phase.DELETE_FILE;
+                mH.currentPhase = Phase.DELETE_FILE;
             } else {
-                pH.bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
-                pH.bufOut.writeByte((byte) 17);
-                ctx.writeAndFlush(pH.bufOut);
+                mH.bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
+                mH.bufOut.writeByte((byte) 17);
+                ctx.writeAndFlush(mH.bufOut);
                 System.out.println("File name not verified. No such file");
-                pH.currentPhase = Phase.IDLE;
-                pH.currentState = pH.noCommandReceivedState;
+                mH.currentPhase = Phase.IDLE;
+                mH.currentState = mH.noCommandReceivedState;
                 return false;
             }
         }
 
-        if (pH.currentPhase == Phase.DELETE_FILE) {
+        if (mH.currentPhase == Phase.DELETE_FILE) {
             System.out.println("STATE: File deleting");
-            Files.delete(pH.path);
-            pH.bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
-            pH.bufOut.writeByte(Command.DELCL.getSignalByte());
-            ctx.writeAndFlush(pH.bufOut);
-            pH.currentPhase = Phase.IDLE;
+            Files.delete(mH.path);
+            mH.bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
+            mH.bufOut.writeByte(Command.DELCL.getSignalByte());
+            ctx.writeAndFlush(mH.bufOut);
+            mH.currentPhase = Phase.IDLE;
         }
 
-        pH.currentState = pH.noCommandReceivedState;
+        mH.currentState = mH.noCommandReceivedState;
         return true;
     }
 }

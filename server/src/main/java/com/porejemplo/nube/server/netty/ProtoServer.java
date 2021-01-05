@@ -1,5 +1,6 @@
 package com.porejemplo.nube.server.netty;
 
+import com.porejemplo.nube.server.auth.service.AuthService;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -21,12 +22,14 @@ public class ProtoServer {
                         @Override
                         public void initChannel(SocketChannel ch) {
                             ch.pipeline()
-                                    .addLast(new MainHandler());
+                                    .addLast(new AuthHandler());
                         }
                     });
+            AuthService.connect();
             ChannelFuture f = b.bind(8189).sync();
             f.channel().closeFuture().sync();
         } finally {
+            AuthService.disconnect();
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();
         }

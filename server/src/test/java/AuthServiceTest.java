@@ -3,6 +3,8 @@ import com.porejemplo.nube.server.auth.repository.UserDAO;
 import com.porejemplo.nube.server.auth.service.AuthService;
 import org.junit.jupiter.api.*;
 
+// These tests will run successfully if you uncomment line 18 in UserDAO.java and comment line 16.
+
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class AuthServiceTest {
 

@@ -6,10 +6,10 @@ import io.netty.channel.ChannelHandlerContext;
 
 public class NoCommandReceivedState implements State {
 
-    private final MainHandler pH;
+    private final MainHandler mH;
 
-    public NoCommandReceivedState(MainHandler pH) {
-        this.pH = pH;
+    public NoCommandReceivedState(MainHandler mH) {
+        this.mH = mH;
     }
 
     @Override
@@ -24,32 +24,32 @@ public class NoCommandReceivedState implements State {
             }
             switch (command) {
                 case LSCL:
-                    pH.currentPhase = Phase.FILES_LIST;
+                    mH.currentPhase = Phase.FILES_LIST;
                     System.out.println("STATE: Start to obtain file list in server");
-                    return pH.listCommandReceivedState;
+                    return mH.listCommandReceivedState;
                 case UPLD:
-                    pH.currentPhase = Phase.NAME_LENGTH;
-                    pH.receivedFileLength = 0L;
+                    mH.currentPhase = Phase.NAME_LENGTH;
+                    mH.receivedFileLength = 0L;
                     System.out.println("STATE: Start of file upload");
-                    return pH.uploadCommandReceivedState;
+                    return mH.uploadCommandReceivedState;
                 case DNLD:
-                    pH.currentPhase = Phase.NAME_LENGTH;
+                    mH.currentPhase = Phase.NAME_LENGTH;
                     System.out.println("STATE: Start of file download");
-                    return pH.downloadCommandReceivedState;
+                    return mH.downloadCommandReceivedState;
                 case RMCL:
-                    pH.currentPhase = Phase.NAME_LENGTH;
+                    mH.currentPhase = Phase.NAME_LENGTH;
                     System.out.println("STATE: Start of file renaming");
-                    return pH.renameCommandReceivedState;
+                    return mH.renameCommandReceivedState;
                 case DELCL:
-                    pH.currentPhase = Phase.NAME_LENGTH;
+                    mH.currentPhase = Phase.NAME_LENGTH;
                     System.out.println("STATE: Start of file deleting");
-                    return pH.deleteCommandReceivedState;
+                    return mH.deleteCommandReceivedState;
                 default:
                     System.out.println("ERROR: Invalid first byte - " + signalByte);
-                    return pH.noCommandReceivedState;
+                    return mH.noCommandReceivedState;
             }
         }
-        return pH.currentState;
+        return mH.currentState;
 //        return this;
     }
 

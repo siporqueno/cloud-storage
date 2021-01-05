@@ -49,9 +49,11 @@ public class MainHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        System.out.println("MainHandler.channelRead is called " + buf.capacity() + " " + buf.readerIndex() + " " + buf.writerIndex());
         ByteBuf m = (ByteBuf) msg;
         buf.writeBytes(m);
         m.release();
+        System.out.println("ReadableBytes: " + buf.readableBytes());
 
         currentState = receiveCommand();
         processCommand(ctx);

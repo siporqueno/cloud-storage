@@ -13,10 +13,10 @@ import java.nio.file.Paths;
 
 public class DownloadCommandReceivedState implements State {
 
-    private final MainHandler pH;
+    private final MainHandler mH;
 
-    public DownloadCommandReceivedState(MainHandler pH) {
-        this.pH = pH;
+    public DownloadCommandReceivedState(MainHandler mH) {
+        this.mH = mH;
     }
 
     @Override
@@ -27,56 +27,56 @@ public class DownloadCommandReceivedState implements State {
     @Override
     public boolean processCommand(ChannelHandlerContext ctx) throws IOException {
 
-        if (pH.currentPhase == Phase.NAME_LENGTH) {
-            System.out.println("inside if NAME_LENGTH " + pH.buf.readableBytes());
-            if (pH.buf.readableBytes() >= 4) {
+        if (mH.currentPhase == Phase.NAME_LENGTH) {
+            System.out.println("inside if NAME_LENGTH " + mH.buf.readableBytes());
+            if (mH.buf.readableBytes() >= 4) {
                 System.out.println("STATE: Getting filename length");
-                pH.nameLength = pH.buf.readInt();
-                pH.currentPhase = Phase.NAME;
+                mH.nameLength = mH.buf.readInt();
+                mH.currentPhase = Phase.NAME;
             } else return false;
         }
 
-        if (pH.currentPhase == Phase.NAME) {
-            if (pH.buf.readableBytes() >= pH.nameLength) {
-                byte[] fileName = new byte[pH.nameLength];
-                pH.buf.readBytes(fileName);
+        if (mH.currentPhase == Phase.NAME) {
+            if (mH.buf.readableBytes() >= mH.nameLength) {
+                byte[] fileName = new byte[mH.nameLength];
+                mH.buf.readBytes(fileName);
                 System.out.println("STATE: Filename received - " + new String(fileName, "UTF-8"));
-                pH.path = Paths.get("server_storage", new String(fileName));
-                pH.currentPhase = Phase.VERIFY_FILE_PRESENCE;
+                mH.path = Paths.get("server_storage", new String(fileName));
+                mH.currentPhase = Phase.VERIFY_FILE_PRESENCE;
             } else return false;
         }
 
-        if (pH.currentPhase == Phase.VERIFY_FILE_PRESENCE) {
+        if (mH.currentPhase == Phase.VERIFY_FILE_PRESENCE) {
             System.out.println("STATE: File presence verification ");
-            if (Files.exists(pH.path)) {
-                pH.bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
+            if (Files.exists(mH.path)) {
+                mH.bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
                 System.out.println("File name verified");
-                pH.bufOut.writeByte(Command.DNLD.getSignalByte());
-                ctx.writeAndFlush(pH.bufOut);
-                pH.currentPhase = Phase.FILE_DESPATCH;
+                mH.bufOut.writeByte(Command.DNLD.getSignalByte());
+                ctx.writeAndFlush(mH.bufOut);
+                mH.currentPhase = Phase.FILE_DESPATCH;
             } else {
-                pH.bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
-                pH.bufOut.writeByte((byte) 17);
-                ctx.writeAndFlush(pH.bufOut);
+                mH.bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
+                mH.bufOut.writeByte((byte) 17);
+                ctx.writeAndFlush(mH.bufOut);
                 System.out.println("File name not verified. No such file");
-                pH.currentPhase = Phase.IDLE;
-                pH.currentState = pH.noCommandReceivedState;
+                mH.currentPhase = Phase.IDLE;
+                mH.currentState = mH.noCommandReceivedState;
                 return false;
             }
         }
 
-        if (pH.currentPhase == Phase.FILE_DESPATCH) {
+        if (mH.currentPhase == Phase.FILE_DESPATCH) {
             System.out.println("STATE: File download");
-            pH.bufOut = ByteBufAllocator.DEFAULT.directBuffer(8);
-            pH.bufOut.writeLong(Files.size(pH.path));
-            ctx.writeAndFlush(pH.bufOut);
+            mH.bufOut = ByteBufAllocator.DEFAULT.directBuffer(8);
+            mH.bufOut.writeLong(Files.size(mH.path));
+            ctx.writeAndFlush(mH.bufOut);
             // Despatch of the file from server to client
-            FileRegion region = new DefaultFileRegion(pH.path.toFile(), 0, Files.size(pH.path));
+            FileRegion region = new DefaultFileRegion(mH.path.toFile(), 0, Files.size(mH.path));
             ctx.writeAndFlush(region);
-            pH.currentPhase = Phase.IDLE;
+            mH.currentPhase = Phase.IDLE;
         }
 
-        pH.currentState = pH.noCommandReceivedState;
+        mH.currentState = mH.noCommandReceivedState;
         return true;
     }
 }

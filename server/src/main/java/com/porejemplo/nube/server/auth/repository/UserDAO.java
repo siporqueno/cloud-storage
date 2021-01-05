@@ -13,7 +13,9 @@ public class UserDAO {
     public static void connect() throws SQLException {
         try {
             Class.forName("org.sqlite.JDBC");
-            connection = DriverManager.getConnection("jdbc:sqlite:src\\main\\resources\\mainDb.db");
+            connection = DriverManager.getConnection("jdbc:sqlite:server\\mainDb.db");
+            // Tests in AuthServiceTest.java will run successfully if you uncomment below line and comment the above line.
+//            connection = DriverManager.getConnection("jdbc:sqlite:mainDb.db");
             stmt = connection.createStatement();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
