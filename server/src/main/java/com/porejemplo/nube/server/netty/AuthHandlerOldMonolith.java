@@ -7,33 +7,18 @@ import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-public class AuthHandler extends ChannelInboundHandlerAdapter {
-
-    State unauthNoCommandReceivedStateOfAuthHandler;
-    State unauthLoginCommandReceivedStateOfAuthHandler;
-    State authStateOfAuthHandler;
-    State currentState;
+public class AuthHandlerOldMonolith extends ChannelInboundHandlerAdapter {
 
     ByteBuf buf;
     ByteBuf bufOut;
-//    boolean authOk = false;
+    boolean authOk = false;
     Phase currentPhase = Phase.IDLE;
-    byte signalByte;
-    long receivedFileLength;
     int usernameLength;
     int passwordLength;
-    String username;
-    String password;
-
-    public AuthHandler() {
-        this.unauthNoCommandReceivedStateOfAuthHandler = new UnauthNoCommandReceivedStateOfAuthHandler(this);
-        this.unauthLoginCommandReceivedStateOfAuthHandler = new UnauthLoginCommandReceivedStateOfAuthHandler(this);
-        this.authStateOfAuthHandler = new AuthStateOfAuthHandler(this);
-        this.currentState = unauthNoCommandReceivedStateOfAuthHandler;
-    }
+    private String username;
+    private String password;
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
@@ -47,10 +32,7 @@ public class AuthHandler extends ChannelInboundHandlerAdapter {
         buf.writeBytes(m);
         m.release();
 
-        currentState = receiveCommand();
-        processCommand(ctx);
-
-        /*if (authOk) {
+        if (authOk) {
             ctx.fireChannelRead(buf.retain());
             return;
         }
@@ -108,7 +90,10 @@ public class AuthHandler extends ChannelInboundHandlerAdapter {
                     bufOut.writeByte(Command.LOGIN.getSignalByte());
                     ctx.writeAndFlush(bufOut);
                     authOk = true;
-                    ctx.pipeline().addLast(new MainHandler(this));
+                    // The below line with new AuthHandler() is added just to avoid error
+                    ctx.pipeline().addLast(new MainHandler(new AuthHandler()));
+                    // The below line is commented just to avoid error because this is not instance of AuthHandler.java as it was renamed to AuthHandlerOldMonolith.
+//                    ctx.pipeline().addLast(new MainHandler(this));
                     System.out.println("Correct username and password.");
                 } else {
                     bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
@@ -119,15 +104,7 @@ public class AuthHandler extends ChannelInboundHandlerAdapter {
                 currentPhase = Phase.IDLE;
                 break;
             }
-        }*/
-    }
-
-    private State receiveCommand() {
-        return currentState.receiveCommand(signalByte, currentPhase, buf, receivedFileLength);
-    }
-
-    private boolean processCommand(ChannelHandlerContext ctx) throws IOException {
-        return currentState.processCommand(ctx);
+        }
     }
 
     @Override

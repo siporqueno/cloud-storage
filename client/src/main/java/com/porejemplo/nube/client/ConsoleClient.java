@@ -17,9 +17,6 @@ public class ConsoleClient {
     public static final int PORT = 8189;
     public static final String HOST = "localhost";
 
-    private final String mockUsername = "user";
-    private final String mockPassword = "pass";
-
     private final Scanner scanner = new Scanner(System.in);
 
     private CommandHandler commandHandler;

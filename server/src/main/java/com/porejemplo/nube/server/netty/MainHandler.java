@@ -8,7 +8,6 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.sql.SQLOutput;
 
 public class MainHandler extends ChannelInboundHandlerAdapter {
 

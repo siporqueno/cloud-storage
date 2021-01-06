@@ -27,7 +27,9 @@ public class LogoutCommandReceivedStateMain implements State {
 
         if (mH.currentPhase == Phase.LOGOUT) {
             System.out.println("inside if LOGOUT");
-            mH.aH.authOk = false;
+            // The below commented line is compatible with AuthHandlerOldMonolith class where there are no states and field authOk is present.
+//            mH.aH.authOk = false;
+            mH.aH.currentState = mH.aH.unauthNoCommandReceivedStateOfAuthHandler;
             mH.bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
             mH.bufOut.writeByte(Command.LOGOUT.getSignalByte());
             ctx.writeAndFlush(mH.bufOut.retain());
