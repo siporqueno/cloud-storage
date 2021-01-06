@@ -4,16 +4,18 @@ import com.porejemplo.nube.common.Command;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.DefaultFileRegion;
+import io.netty.channel.FileRegion;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-public class RenameCommandReceivedState implements State {
+public class DownloadCommandReceivedStateMain implements State {
 
     private final MainHandler mH;
 
-    public RenameCommandReceivedState(MainHandler mH) {
+    public DownloadCommandReceivedStateMain(MainHandler mH) {
         this.mH = mH;
     }
 
@@ -30,31 +32,16 @@ public class RenameCommandReceivedState implements State {
             if (mH.buf.readableBytes() >= 4) {
                 System.out.println("STATE: Getting filename length");
                 mH.nameLength = mH.buf.readInt();
-                mH.currentPhase = Phase.NEW_NAME_LENGTH;
+                mH.currentPhase = Phase.NAME;
             } else return false;
         }
 
-        if (mH.currentPhase == Phase.NEW_NAME_LENGTH) {
-            System.out.println("inside if NEW_NAME_LENGTH ");
-            if (mH.buf.readableBytes() >= 4) {
-                System.out.println("STATE: Getting new filename length");
-                mH.newNameLength = mH.buf.readInt();
-                mH.currentPhase = Phase.NAME_AND_NEW_NAME;
-            } else return false;
-        }
-
-        if (mH.currentPhase == Phase.NAME_AND_NEW_NAME) {
-            if (mH.buf.readableBytes() >= mH.nameLength + mH.newNameLength) {
+        if (mH.currentPhase == Phase.NAME) {
+            if (mH.buf.readableBytes() >= mH.nameLength) {
                 byte[] fileName = new byte[mH.nameLength];
                 mH.buf.readBytes(fileName);
                 System.out.println("STATE: Filename received - " + new String(fileName, "UTF-8"));
                 mH.path = Paths.get("server_storage", new String(fileName));
-
-                byte[] newFileName = new byte[mH.newNameLength];
-                mH.buf.readBytes(newFileName);
-                System.out.println("STATE: New filename received - " + new String(newFileName, "UTF-8"));
-                mH.newPath = Paths.get("server_storage", new String(newFileName));
-
                 mH.currentPhase = Phase.VERIFY_FILE_PRESENCE;
             } else return false;
         }
@@ -62,29 +49,34 @@ public class RenameCommandReceivedState implements State {
         if (mH.currentPhase == Phase.VERIFY_FILE_PRESENCE) {
             System.out.println("STATE: File presence verification ");
             if (Files.exists(mH.path)) {
+                mH.bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
                 System.out.println("File name verified");
-                mH.currentPhase = Phase.RENAME_FILE;
+                mH.bufOut.writeByte(Command.DNLD.getSignalByte());
+                ctx.writeAndFlush(mH.bufOut);
+                mH.currentPhase = Phase.FILE_DESPATCH;
             } else {
                 mH.bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
                 mH.bufOut.writeByte((byte) 17);
                 ctx.writeAndFlush(mH.bufOut);
                 System.out.println("File name not verified. No such file");
                 mH.currentPhase = Phase.IDLE;
-                mH.currentState = mH.noCommandReceivedState;
+                mH.currentState = mH.noCommandReceivedStateMain;
                 return false;
             }
         }
 
-        if (mH.currentPhase == Phase.RENAME_FILE) {
-            System.out.println("STATE: File renaming");
-            Files.move(mH.path, mH.newPath);
-            mH.bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
-            mH.bufOut.writeByte(Command.RMCL.getSignalByte());
+        if (mH.currentPhase == Phase.FILE_DESPATCH) {
+            System.out.println("STATE: File download");
+            mH.bufOut = ByteBufAllocator.DEFAULT.directBuffer(8);
+            mH.bufOut.writeLong(Files.size(mH.path));
             ctx.writeAndFlush(mH.bufOut);
+            // Despatch of the file from server to client
+            FileRegion region = new DefaultFileRegion(mH.path.toFile(), 0, Files.size(mH.path));
+            ctx.writeAndFlush(region);
             mH.currentPhase = Phase.IDLE;
         }
 
-        mH.currentState = mH.noCommandReceivedState;
+        mH.currentState = mH.noCommandReceivedStateMain;
         return true;
     }
 }

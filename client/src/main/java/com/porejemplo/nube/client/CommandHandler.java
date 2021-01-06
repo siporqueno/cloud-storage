@@ -62,6 +62,10 @@ public class CommandHandler {
                 deleteFileInCloud(outputStream, inputStream, arguments.get(0));
                 break;
             case EXIT:
+                logout(outputStream, inputStream, "You have successfully exited.");
+                break;
+            case LOGOUT:
+                logout(outputStream, inputStream, "You have successfully logged out");
                 break;
             default:
                 System.out.println("Such command does not exist.");
@@ -117,5 +121,11 @@ public class CommandHandler {
         } else if (signalByte == 17) {
             System.out.println("No such file in the Cloud. Please double check file name.");
         }
+    }
+
+    private void logout(DataOutput out, DataInput in, String consoleMessage) throws IOException {
+        out.writeByte(Command.LOGOUT.getSignalByte());
+        byte signalByte = in.readByte();
+        if (signalByte == Command.LOGOUT.getSignalByte()) System.out.println(consoleMessage);
     }
 }

@@ -8,15 +8,19 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.sql.SQLOutput;
 
 public class MainHandler extends ChannelInboundHandlerAdapter {
 
-    State noCommandReceivedState;
-    State listCommandReceivedState;
-    State uploadCommandReceivedState;
-    State downloadCommandReceivedState;
-    State renameCommandReceivedState;
-    State deleteCommandReceivedState;
+    AuthHandler aH;
+
+    State noCommandReceivedStateMain;
+    State listCommandReceivedStateMain;
+    State uploadCommandReceivedStateMain;
+    State downloadCommandReceivedStateMain;
+    State renameCommandReceivedStateMain;
+    State deleteCommandReceivedStateMain;
+    State logoutCommandReceivedStateMain;
     State currentState;
 
     Phase currentPhase = Phase.IDLE;
@@ -31,14 +35,16 @@ public class MainHandler extends ChannelInboundHandlerAdapter {
     ByteBuf buf;
     ByteBuf bufOut;
 
-    public MainHandler() {
-        this.noCommandReceivedState = new NoCommandReceivedState(this);
-        this.listCommandReceivedState = new ListCommandReceivedState(this);
-        this.uploadCommandReceivedState = new UploadCommandReceivedState(this);
-        this.downloadCommandReceivedState = new DownloadCommandReceivedState(this);
-        this.renameCommandReceivedState = new RenameCommandReceivedState(this);
-        this.deleteCommandReceivedState = new DeleteCommandReceivedState(this);
-        this.currentState = noCommandReceivedState;
+    public MainHandler(AuthHandler authHandler) {
+        this.aH = authHandler;
+        this.noCommandReceivedStateMain = new NoCommandReceivedStateMain(this);
+        this.listCommandReceivedStateMain = new ListCommandReceivedStateMain(this);
+        this.uploadCommandReceivedStateMain = new UploadCommandReceivedStateMain(this);
+        this.downloadCommandReceivedStateMain = new DownloadCommandReceivedStateMain(this);
+        this.renameCommandReceivedStateMain = new RenameCommandReceivedStateMain(this);
+        this.deleteCommandReceivedStateMain = new DeleteCommandReceivedStateMain(this);
+        this.logoutCommandReceivedStateMain = new LogoutCommandReceivedStateMain(this);
+        this.currentState = noCommandReceivedStateMain;
     }
 
     @Override
@@ -73,6 +79,7 @@ public class MainHandler extends ChannelInboundHandlerAdapter {
         buf = null;
         bufOut.release();
         bufOut = null;
+        System.out.println("MainHandler removed during logout");
     }
 
     @Override

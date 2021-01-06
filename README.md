@@ -28,3 +28,6 @@ Deletes file file_name in the cloud storage
 
 exit
 Exits the client.
+
+logout
+Logs out.

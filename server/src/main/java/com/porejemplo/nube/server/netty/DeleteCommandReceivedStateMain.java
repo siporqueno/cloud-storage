@@ -9,11 +9,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-public class DeleteCommandReceivedState implements State {
+public class DeleteCommandReceivedStateMain implements State {
 
     private final MainHandler mH;
 
-    public DeleteCommandReceivedState(MainHandler mH) {
+    public DeleteCommandReceivedStateMain(MainHandler mH) {
         this.mH = mH;
     }
 
@@ -55,7 +55,7 @@ public class DeleteCommandReceivedState implements State {
                 ctx.writeAndFlush(mH.bufOut);
                 System.out.println("File name not verified. No such file");
                 mH.currentPhase = Phase.IDLE;
-                mH.currentState = mH.noCommandReceivedState;
+                mH.currentState = mH.noCommandReceivedStateMain;
                 return false;
             }
         }
@@ -69,7 +69,7 @@ public class DeleteCommandReceivedState implements State {
             mH.currentPhase = Phase.IDLE;
         }
 
-        mH.currentState = mH.noCommandReceivedState;
+        mH.currentState = mH.noCommandReceivedStateMain;
         return true;
     }
 }

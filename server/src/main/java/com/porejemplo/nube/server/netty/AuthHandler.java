@@ -15,7 +15,7 @@ public class AuthHandler extends ChannelInboundHandlerAdapter {
 
     ByteBuf buf;
     ByteBuf bufOut;
-    private boolean authOk = false;
+    boolean authOk = false;
     Phase currentPhase = Phase.IDLE;
     int usernameLength;
     int passwordLength;
@@ -92,7 +92,7 @@ public class AuthHandler extends ChannelInboundHandlerAdapter {
                     bufOut.writeByte(Command.LOGIN.getSignalByte());
                     ctx.writeAndFlush(bufOut);
                     authOk = true;
-                    ctx.pipeline().addLast(new MainHandler());
+                    ctx.pipeline().addLast(new MainHandler(this));
                     System.out.println("Correct username and password.");
                 } else {
                     bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
@@ -110,7 +110,9 @@ public class AuthHandler extends ChannelInboundHandlerAdapter {
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
         buf.release();
         buf = null;
-        bufOut.release();
+        if (bufOut.refCnt() > 0) {
+            bufOut.release();
+        }
         bufOut = null;
     }
 

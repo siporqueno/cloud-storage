@@ -4,11 +4,11 @@ import com.porejemplo.nube.common.Command;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 
-public class NoCommandReceivedState implements State {
+public class NoCommandReceivedStateMain implements State {
 
     private final MainHandler mH;
 
-    public NoCommandReceivedState(MainHandler mH) {
+    public NoCommandReceivedStateMain(MainHandler mH) {
         this.mH = mH;
     }
 
@@ -26,27 +26,31 @@ public class NoCommandReceivedState implements State {
                 case LSCL:
                     mH.currentPhase = Phase.FILES_LIST;
                     System.out.println("STATE: Start to obtain file list in server");
-                    return mH.listCommandReceivedState;
+                    return mH.listCommandReceivedStateMain;
                 case UPLD:
                     mH.currentPhase = Phase.NAME_LENGTH;
                     mH.receivedFileLength = 0L;
                     System.out.println("STATE: Start of file upload");
-                    return mH.uploadCommandReceivedState;
+                    return mH.uploadCommandReceivedStateMain;
                 case DNLD:
                     mH.currentPhase = Phase.NAME_LENGTH;
                     System.out.println("STATE: Start of file download");
-                    return mH.downloadCommandReceivedState;
+                    return mH.downloadCommandReceivedStateMain;
                 case RMCL:
                     mH.currentPhase = Phase.NAME_LENGTH;
                     System.out.println("STATE: Start of file renaming");
-                    return mH.renameCommandReceivedState;
+                    return mH.renameCommandReceivedStateMain;
                 case DELCL:
                     mH.currentPhase = Phase.NAME_LENGTH;
                     System.out.println("STATE: Start of file deleting");
-                    return mH.deleteCommandReceivedState;
+                    return mH.deleteCommandReceivedStateMain;
+                case LOGOUT:
+                    mH.currentPhase = Phase.LOGOUT;
+                    System.out.println("STATE: Start of logging out");
+                    return mH.logoutCommandReceivedStateMain;
                 default:
                     System.out.println("ERROR: Invalid first byte - " + signalByte);
-                    return mH.noCommandReceivedState;
+                    return mH.noCommandReceivedStateMain;
             }
         }
         return mH.currentState;

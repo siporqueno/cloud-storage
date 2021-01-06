@@ -32,7 +32,6 @@ public class ConsoleClient {
             commandHandler = new CommandHandler(new IOUploadService(out), new IODownloadService(out, in));
             scanner.useDelimiter("\\n");
             authenticate(out, in);
-            runClient(out, in);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -47,12 +46,11 @@ public class ConsoleClient {
         while (true) {
             receivedUsername = receiveConsoleInput("username");
             receivedPassword = receiveConsoleInput("password");
-            /*if (receivedUsername.equals(mockUsername) && receivedPassword.equals(mockPassword)) {
-                break;
-            } else
-                System.out.println("Your username and/or password are wrong. Please try again.");*/
 
-            if (areUsernameAndPasswordCorrectForCloud(out, in, receivedUsername, receivedPassword)) break;
+            if (areUsernameAndPasswordCorrectForCloud(out, in, receivedUsername, receivedPassword)) {
+                runClient(out, in);
+                break;
+            }
         }
     }
 
@@ -109,7 +107,13 @@ public class ConsoleClient {
             } catch (ArgumentException e) {
                 e.printStackTrace();
             }
-            if (response.equals("exit")) break;
+            if (response.equals("logout")) {
+                authenticate(outputStream, inputStream);
+                break;
+            }
+            if (response.equals("exit")) {
+                break;
+            }
         }
     }
 
