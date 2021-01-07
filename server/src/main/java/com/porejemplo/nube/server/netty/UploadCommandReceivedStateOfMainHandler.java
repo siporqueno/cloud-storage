@@ -18,7 +18,7 @@ public class UploadCommandReceivedStateOfMainHandler implements State {
     }
 
     @Override
-    public State receiveCommand(byte signalByte, Phase currentPhase, ByteBuf buf, long receivedFileLength) {
+    public State receiveCommand() {
         return this;
     }
 

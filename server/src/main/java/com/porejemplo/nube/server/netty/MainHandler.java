@@ -64,7 +64,7 @@ public class MainHandler extends ChannelInboundHandlerAdapter {
     }
 
     private State receiveCommand() {
-        return currentState.receiveCommand(signalByte, currentPhase, buf, receivedFileLength);
+        return currentState.receiveCommand();
     }
 
     private boolean processCommand(ChannelHandlerContext ctx) throws IOException {

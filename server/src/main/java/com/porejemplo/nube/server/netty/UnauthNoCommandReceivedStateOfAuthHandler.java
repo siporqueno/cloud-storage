@@ -13,9 +13,10 @@ public class UnauthNoCommandReceivedStateOfAuthHandler implements State {
     }
 
     @Override
-    public State receiveCommand(byte signalByte, Phase currentPhase, ByteBuf buf, long receivedFileLength) {
+    public State receiveCommand() {
         if (aH.currentPhase == Phase.IDLE) {
-            aH.signalByte = buf.readByte();
+//            aH.signalByte = buf.readByte();
+            aH.signalByte = aH.buf.readByte();
             Command command = null;
             try {
                 command = Command.findCommandBySignalByte(aH.signalByte);

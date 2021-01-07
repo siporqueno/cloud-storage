@@ -13,9 +13,10 @@ public class NoCommandReceivedStateOfMainHandler implements State {
     }
 
     @Override
-    public State receiveCommand(byte signalByte, Phase currentPhase, ByteBuf buf, long receivedFileLength) {
+    public State receiveCommand() {
         if (mH.currentPhase == Phase.IDLE) {
-            mH.signalByte = buf.readByte();
+//            mH.signalByte = buf.readByte();
+            mH.signalByte = mH.buf.readByte();
             Command command = null;
             try {
                 command = Command.findCommandBySignalByte(mH.signalByte);
