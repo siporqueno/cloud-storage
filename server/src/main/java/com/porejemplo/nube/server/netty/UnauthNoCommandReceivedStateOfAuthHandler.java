@@ -14,11 +14,11 @@ public class UnauthNoCommandReceivedStateOfAuthHandler implements State {
 
     @Override
     public State receiveCommand(byte signalByte, Phase currentPhase, ByteBuf buf, long receivedFileLength) {
-        if (currentPhase == Phase.IDLE) {
-            signalByte = buf.readByte();
+        if (aH.currentPhase == Phase.IDLE) {
+            aH.signalByte = buf.readByte();
             Command command = null;
             try {
-                command = Command.findCommandBySignalByte(signalByte);
+                command = Command.findCommandBySignalByte(aH.signalByte);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -28,7 +28,7 @@ public class UnauthNoCommandReceivedStateOfAuthHandler implements State {
                     System.out.println("STATE: Start to check username and password.");
                     return aH.unauthLoginCommandReceivedStateOfAuthHandler;
                 default:
-                    System.out.println("ERROR: Invalid first byte - " + signalByte);
+                    System.out.println("ERROR: Invalid first byte - " + aH.signalByte);
                     return aH.unauthNoCommandReceivedStateOfAuthHandler;
             }
         }

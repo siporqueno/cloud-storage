@@ -14,11 +14,11 @@ public class NoCommandReceivedStateOfMainHandler implements State {
 
     @Override
     public State receiveCommand(byte signalByte, Phase currentPhase, ByteBuf buf, long receivedFileLength) {
-        if (currentPhase == Phase.IDLE) {
-            signalByte = buf.readByte();
+        if (mH.currentPhase == Phase.IDLE) {
+            mH.signalByte = buf.readByte();
             Command command = null;
             try {
-                command = Command.findCommandBySignalByte(signalByte);
+                command = Command.findCommandBySignalByte(mH.signalByte);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -49,12 +49,11 @@ public class NoCommandReceivedStateOfMainHandler implements State {
                     System.out.println("STATE: Start of logging out");
                     return mH.logoutCommandReceivedStateOfMainHandler;
                 default:
-                    System.out.println("ERROR: Invalid first byte - " + signalByte);
+                    System.out.println("ERROR: Invalid first byte - " + mH.signalByte);
                     return mH.noCommandReceivedStateOfMainHandler;
             }
         }
         return mH.currentState;
-//        return this;
     }
 
     @Override

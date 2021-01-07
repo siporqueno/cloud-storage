@@ -107,7 +107,7 @@ public class MainCommandHandler {
         byte signalByte = in.readByte();
         if (signalByte == Command.RMCL.getSignalByte()) {
             System.out.println("Great. Such file has been found and just renamed");
-        } else if (signalByte == 17) {
+        } else if (signalByte == Command.RMCL.getFailureByte()) {
             System.out.println("No such file in the Cloud. Please double check file name.");
         }
     }
@@ -120,7 +120,7 @@ public class MainCommandHandler {
         byte signalByte = in.readByte();
         if (signalByte == Command.DELCL.getSignalByte()) {
             System.out.println("Great. Such file has been found and just deleted");
-        } else if (signalByte == 17) {
+        } else if (signalByte == Command.DELCL.getFailureByte()) {
             System.out.println("No such file in the Cloud. Please double check file name.");
         }
     }

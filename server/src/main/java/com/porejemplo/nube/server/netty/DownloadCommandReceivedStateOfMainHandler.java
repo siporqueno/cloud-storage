@@ -8,6 +8,7 @@ import io.netty.channel.DefaultFileRegion;
 import io.netty.channel.FileRegion;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -40,7 +41,7 @@ public class DownloadCommandReceivedStateOfMainHandler implements State {
             if (mH.buf.readableBytes() >= mH.nameLength) {
                 byte[] fileName = new byte[mH.nameLength];
                 mH.buf.readBytes(fileName);
-                System.out.println("STATE: Filename received - " + new String(fileName, "UTF-8"));
+                System.out.println("STATE: Filename received - " + new String(fileName, StandardCharsets.UTF_8));
                 mH.path = Paths.get("server_storage", new String(fileName));
                 mH.currentPhase = Phase.VERIFY_FILE_PRESENCE;
             } else return false;
@@ -56,7 +57,7 @@ public class DownloadCommandReceivedStateOfMainHandler implements State {
                 mH.currentPhase = Phase.FILE_DESPATCH;
             } else {
                 mH.bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
-                mH.bufOut.writeByte((byte) 17);
+                mH.bufOut.writeByte(Command.DNLD.getFailureByte());
                 ctx.writeAndFlush(mH.bufOut);
                 System.out.println("File name not verified. No such file");
                 mH.currentPhase = Phase.IDLE;

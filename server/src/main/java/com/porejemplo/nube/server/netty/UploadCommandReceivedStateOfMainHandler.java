@@ -6,6 +6,7 @@ import io.netty.channel.ChannelHandlerContext;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 
 public class UploadCommandReceivedStateOfMainHandler implements State {
@@ -37,7 +38,7 @@ public class UploadCommandReceivedStateOfMainHandler implements State {
             if (mH.buf.readableBytes() >= mH.nameLength) {
                 byte[] fileName = new byte[mH.nameLength];
                 mH.buf.readBytes(fileName);
-                System.out.println("STATE: Filename received - " + new String(fileName, "UTF-8"));
+                System.out.println("STATE: Filename received - " + new String(fileName, StandardCharsets.UTF_8));
                 mH.path = Paths.get("server_storage", new String(fileName));
                 mH.out = new BufferedOutputStream(new FileOutputStream(mH.path.toFile()));
                 mH.currentPhase = Phase.FILE_LENGTH;
@@ -53,6 +54,7 @@ public class UploadCommandReceivedStateOfMainHandler implements State {
         }
 
         if (mH.currentPhase == Phase.FILE) {
+            System.out.println(mH.buf.capacity());
             while (mH.buf.readableBytes() > 0) {
                 mH.out.write(mH.buf.readByte());
                 mH.receivedFileLength++;
@@ -60,12 +62,14 @@ public class UploadCommandReceivedStateOfMainHandler implements State {
                 if (mH.fileLength == mH.receivedFileLength) {
                     mH.currentPhase = Phase.IDLE;
                     System.out.println("File received");
+                    System.out.println(mH.buf.capacity());
                     mH.out.close();
-                    break;
+                    mH.currentState = mH.noCommandReceivedStateOfMainHandler;
+                    return true;
                 }
             }
         }
-        mH.currentState = mH.noCommandReceivedStateOfMainHandler;
-        return true;
+        mH.currentState = mH.uploadCommandReceivedStateOfMainHandler;
+        return false;
     }
 }
