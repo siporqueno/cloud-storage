@@ -19,7 +19,6 @@ public class AuthHandler extends ChannelInboundHandlerAdapter {
 
     ByteBuf buf;
     ByteBuf bufOut;
-//    boolean authOk = false;
     Phase currentPhase = Phase.IDLE;
     byte signalByte;
     long receivedFileLength;
@@ -37,6 +36,7 @@ public class AuthHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("AuthHandler added.");
         buf = ByteBufAllocator.DEFAULT.directBuffer(1);
         bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
     }
@@ -50,76 +50,6 @@ public class AuthHandler extends ChannelInboundHandlerAdapter {
         currentState = receiveCommand();
         processCommand(ctx);
 
-        /*if (authOk) {
-            ctx.fireChannelRead(buf.retain());
-            return;
-        }
-
-        while (buf.readableBytes() > 0) {
-
-            if (currentPhase == Phase.IDLE) {
-                Command command = Command.findCommandBySignalByte(buf.readByte());
-                switch (command) {
-                    case LOGIN:
-                        currentPhase = Phase.USERNAME_LENGTH;
-                        System.out.println("STATE: Start to check username and password.");
-                        break;
-                }
-            }
-
-            if (currentPhase == Phase.USERNAME_LENGTH) {
-                System.out.println("inside if USERNAME_LENGTH " + buf.readableBytes());
-                if (buf.readableBytes() >= 4) {
-                    System.out.println("STATE: Getting username length");
-                    usernameLength = buf.readInt();
-                    currentPhase = Phase.PASSWORD_LENGTH;
-                } else break;
-            }
-
-            if (currentPhase == Phase.PASSWORD_LENGTH) {
-                System.out.println("inside if PASSWORD_LENGTH ");
-                if (buf.readableBytes() >= 4) {
-                    System.out.println("STATE: Getting password length");
-                    passwordLength = buf.readInt();
-                    currentPhase = Phase.USERNAME_AND_PASSWORD;
-                } else break;
-            }
-
-            if (currentPhase == Phase.USERNAME_AND_PASSWORD) {
-                if (buf.readableBytes() >= usernameLength + passwordLength) {
-                    byte[] usernameBytes = new byte[usernameLength];
-                    buf.readBytes(usernameBytes);
-                    username = new String(usernameBytes, StandardCharsets.UTF_8);
-                    System.out.println("STATE: username received - " + username);
-
-                    byte[] passwordBytes = new byte[passwordLength];
-                    buf.readBytes(passwordBytes);
-                    password = new String(passwordBytes, StandardCharsets.UTF_8);
-                    System.out.println("STATE: New password received - " + password);
-
-                    currentPhase = Phase.VERIFY_USERNAME_AND_PASSWORD;
-                } else break;
-            }
-
-            if (currentPhase == Phase.VERIFY_USERNAME_AND_PASSWORD) {
-                System.out.println("STATE: username and password verification ");
-                if (AuthService.verifyUsernameAndPassword(username, password)) {
-                    bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
-                    bufOut.writeByte(Command.LOGIN.getSignalByte());
-                    ctx.writeAndFlush(bufOut);
-                    authOk = true;
-                    ctx.pipeline().addLast(new MainHandler(this));
-                    System.out.println("Correct username and password.");
-                } else {
-                    bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
-                    bufOut.writeByte(Command.LOGIN.getFailureByte());
-                    ctx.writeAndFlush(bufOut);
-                    System.out.println("Wrong username and/or password.");
-                }
-                currentPhase = Phase.IDLE;
-                break;
-            }
-        }*/
     }
 
     private State receiveCommand() {
@@ -132,6 +62,7 @@ public class AuthHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("AuthHandler removed.");
         buf.release();
         buf = null;
         if (bufOut.refCnt() > 0) {

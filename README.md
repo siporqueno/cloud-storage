@@ -29,5 +29,11 @@ Deletes file file_name in the cloud storage
 exit
 Exits the client.
 
+login username password
+Logs in.
+
 logout
 Logs out.
+
+register username password nickname
+Registers new user. !!! This command is under development !!!

@@ -14,8 +14,9 @@ public enum Command {
     DELLC("dellc", "dellc file_name\nDeletes file file_name in the local storage", 1, (byte) -1, (byte) -1),
     DELCL("delcl", "delcl file_name\nDeletes file file_name in the cloud storage", 1, (byte) 19, (byte) -1),
     EXIT("exit", "exit\nExits the client.", 0, (byte) -1, (byte) -1),
-    LOGIN("none", "internal command, not for console. Console client asks for username and login without any commands", 0, (byte) 20, (byte) 21),
-    LOGOUT("logout", "logout\nLogs out.", 0, (byte) 22, (byte) 23);
+    LOGIN("login", "login username password\nLogs in.", 2, (byte) 20, (byte) 21),
+    LOGOUT("logout", "logout\nLogs out.", 0, (byte) 22, (byte) 23),
+    REG("register", "register username password nickname\nRegisters new user.", 0, (byte) 24, (byte) 25);
 
     private final String name;
     private final String description;
@@ -41,7 +42,7 @@ public enum Command {
 
     public boolean checkArguments(List<String> arguments) throws ArgumentException {
         if (arguments.size() != requiredArgumentsNumber) {
-            throw new ArgumentException(String.format("Wrong format of the command %s", name));
+            throw new ArgumentException(String.format("Wrong format of the command %s.", name));
         }
         return true;
     }

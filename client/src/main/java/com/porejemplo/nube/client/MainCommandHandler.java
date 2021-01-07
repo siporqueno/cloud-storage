@@ -14,12 +14,14 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class CommandHandler {
+public class MainCommandHandler {
 
+    private final ConsoleClient consoleClient;
     private final UploadService uploadService;
     private final DownloadService downloadService;
 
-    public CommandHandler(UploadService uploadService, DownloadService downloadService) {
+    public MainCommandHandler(ConsoleClient consoleClient, UploadService uploadService, DownloadService downloadService) {
+        this.consoleClient = consoleClient;
         this.uploadService = uploadService;
         this.downloadService = downloadService;
     }
@@ -68,7 +70,7 @@ public class CommandHandler {
                 logout(outputStream, inputStream, "You have successfully logged out");
                 break;
             default:
-                System.out.println("Such command does not exist.");
+                System.out.println("Such command is not available (You are logged in).");
         }
     }
 
@@ -126,6 +128,9 @@ public class CommandHandler {
     private void logout(DataOutput out, DataInput in, String consoleMessage) throws IOException {
         out.writeByte(Command.LOGOUT.getSignalByte());
         byte signalByte = in.readByte();
-        if (signalByte == Command.LOGOUT.getSignalByte()) System.out.println(consoleMessage);
+        if (signalByte == Command.LOGOUT.getSignalByte()) {
+            consoleClient.setAuthOk(false);
+            System.out.println(consoleMessage);
+        }
     }
 }

@@ -48,17 +48,16 @@ public class MainHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("MainHandler added.");
         buf = ByteBufAllocator.DEFAULT.directBuffer(1);
         bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        System.out.println("MainHandler.channelRead is called " + buf.capacity() + " " + buf.readerIndex() + " " + buf.writerIndex());
         ByteBuf m = (ByteBuf) msg;
         buf.writeBytes(m);
         m.release();
-        System.out.println("ReadableBytes: " + buf.readableBytes());
 
         currentState = receiveCommand();
         processCommand(ctx);
@@ -78,7 +77,7 @@ public class MainHandler extends ChannelInboundHandlerAdapter {
         buf = null;
         bufOut.release();
         bufOut = null;
-        System.out.println("MainHandler removed during logout");
+        System.out.println("MainHandler removed.");
     }
 
     @Override
