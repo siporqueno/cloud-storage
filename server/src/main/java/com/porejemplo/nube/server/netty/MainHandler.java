@@ -13,13 +13,13 @@ public class MainHandler extends ChannelInboundHandlerAdapter {
 
     AuthHandler aH;
 
-    State noCommandReceivedStateMain;
-    State listCommandReceivedStateMain;
-    State uploadCommandReceivedStateMain;
-    State downloadCommandReceivedStateMain;
-    State renameCommandReceivedStateMain;
-    State deleteCommandReceivedStateMain;
-    State logoutCommandReceivedStateMain;
+    State noCommandReceivedStateOfMainHandler;
+    State listCommandReceivedStateOfMainHandler;
+    State uploadCommandReceivedStateOfMainHandler;
+    State downloadCommandReceivedStateOfMainHandler;
+    State renameCommandReceivedStateOfMainHandler;
+    State deleteCommandReceivedStateOfMainHandler;
+    State logoutCommandReceivedStateOfMainHandler;
     State currentState;
 
     Phase currentPhase = Phase.IDLE;
@@ -36,14 +36,14 @@ public class MainHandler extends ChannelInboundHandlerAdapter {
 
     public MainHandler(AuthHandler authHandler) {
         this.aH = authHandler;
-        this.noCommandReceivedStateMain = new NoCommandReceivedStateMain(this);
-        this.listCommandReceivedStateMain = new ListCommandReceivedStateMain(this);
-        this.uploadCommandReceivedStateMain = new UploadCommandReceivedStateMain(this);
-        this.downloadCommandReceivedStateMain = new DownloadCommandReceivedStateMain(this);
-        this.renameCommandReceivedStateMain = new RenameCommandReceivedStateMain(this);
-        this.deleteCommandReceivedStateMain = new DeleteCommandReceivedStateMain(this);
-        this.logoutCommandReceivedStateMain = new LogoutCommandReceivedStateMain(this);
-        this.currentState = noCommandReceivedStateMain;
+        this.noCommandReceivedStateOfMainHandler = new NoCommandReceivedStateOfMainHandler(this);
+        this.listCommandReceivedStateOfMainHandler = new ListCommandReceivedStateOfMainHandler(this);
+        this.uploadCommandReceivedStateOfMainHandler = new UploadCommandReceivedStateOfMainHandler(this);
+        this.downloadCommandReceivedStateOfMainHandler = new DownloadCommandReceivedStateOfMainHandler(this);
+        this.renameCommandReceivedStateOfMainHandler = new RenameCommandReceivedStateOfMainHandler(this);
+        this.deleteCommandReceivedStateOfMainHandler = new DeleteCommandReceivedStateOfMainHandler(this);
+        this.logoutCommandReceivedStateOfMainHandler = new LogoutCommandReceivedStateOfMainHandler(this);
+        this.currentState = noCommandReceivedStateOfMainHandler;
     }
 
     @Override

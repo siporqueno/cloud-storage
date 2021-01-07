@@ -8,11 +8,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
 
-public class UploadCommandReceivedStateMain implements State {
+public class UploadCommandReceivedStateOfMainHandler implements State {
 
     private final MainHandler mH;
 
-    public UploadCommandReceivedStateMain(MainHandler mH) {
+    public UploadCommandReceivedStateOfMainHandler(MainHandler mH) {
         this.mH = mH;
     }
 
@@ -65,7 +65,7 @@ public class UploadCommandReceivedStateMain implements State {
                 }
             }
         }
-        mH.currentState = mH.noCommandReceivedStateMain;
+        mH.currentState = mH.noCommandReceivedStateOfMainHandler;
         return true;
     }
 }

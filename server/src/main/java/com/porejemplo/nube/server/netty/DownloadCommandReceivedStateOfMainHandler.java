@@ -11,11 +11,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-public class DownloadCommandReceivedStateMain implements State {
+public class DownloadCommandReceivedStateOfMainHandler implements State {
 
     private final MainHandler mH;
 
-    public DownloadCommandReceivedStateMain(MainHandler mH) {
+    public DownloadCommandReceivedStateOfMainHandler(MainHandler mH) {
         this.mH = mH;
     }
 
@@ -60,7 +60,7 @@ public class DownloadCommandReceivedStateMain implements State {
                 ctx.writeAndFlush(mH.bufOut);
                 System.out.println("File name not verified. No such file");
                 mH.currentPhase = Phase.IDLE;
-                mH.currentState = mH.noCommandReceivedStateMain;
+                mH.currentState = mH.noCommandReceivedStateOfMainHandler;
                 return false;
             }
         }
@@ -76,7 +76,7 @@ public class DownloadCommandReceivedStateMain implements State {
             mH.currentPhase = Phase.IDLE;
         }
 
-        mH.currentState = mH.noCommandReceivedStateMain;
+        mH.currentState = mH.noCommandReceivedStateOfMainHandler;
         return true;
     }
 }

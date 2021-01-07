@@ -12,11 +12,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Collectors;
 
-public class ListCommandReceivedStateMain implements State {
+public class ListCommandReceivedStateOfMainHandler implements State {
 
     private final MainHandler mH;
 
-    public ListCommandReceivedStateMain(MainHandler mH) {
+    public ListCommandReceivedStateOfMainHandler(MainHandler mH) {
         this.mH = mH;
     }
 
@@ -49,7 +49,7 @@ public class ListCommandReceivedStateMain implements State {
             mH.currentPhase = Phase.IDLE;
         }
 
-        mH.currentState = mH.noCommandReceivedStateMain;
+        mH.currentState = mH.noCommandReceivedStateOfMainHandler;
         return true;
     }
 }

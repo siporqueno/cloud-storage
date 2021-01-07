@@ -6,14 +6,12 @@ import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
-public class LogoutCommandReceivedStateMain implements State {
+public class LogoutCommandReceivedStateOfMainHandler implements State {
 
     private final MainHandler mH;
 
-    public LogoutCommandReceivedStateMain(MainHandler mH) {
+    public LogoutCommandReceivedStateOfMainHandler(MainHandler mH) {
         this.mH = mH;
     }
 
@@ -37,7 +35,7 @@ public class LogoutCommandReceivedStateMain implements State {
             ctx.pipeline().remove(mH);
         }
 
-        mH.currentState = mH.noCommandReceivedStateMain;
+        mH.currentState = mH.noCommandReceivedStateOfMainHandler;
         return true;
     }
 }
