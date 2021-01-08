@@ -15,7 +15,6 @@ public class NoCommandReceivedStateOfMainHandler implements State {
     @Override
     public State receiveCommand() {
         if (mH.currentPhase == Phase.IDLE) {
-//            mH.signalByte = buf.readByte();
             mH.signalByte = mH.buf.readByte();
             Command command = null;
             try {

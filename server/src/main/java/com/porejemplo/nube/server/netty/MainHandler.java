@@ -26,6 +26,7 @@ public class MainHandler extends ChannelInboundHandlerAdapter {
     int nameLength;
     int newNameLength;
     long fileLength;
+    String fileName;
     long receivedFileLength;
     BufferedOutputStream out;
     Path path;

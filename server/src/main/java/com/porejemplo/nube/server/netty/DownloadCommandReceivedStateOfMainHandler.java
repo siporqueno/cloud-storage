@@ -3,9 +3,7 @@ package com.porejemplo.nube.server.netty;
 import com.porejemplo.nube.common.Command;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.DefaultFileRegion;
-import io.netty.channel.FileRegion;
+import io.netty.channel.*;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -39,10 +37,11 @@ public class DownloadCommandReceivedStateOfMainHandler implements State {
 
         if (mH.currentPhase == Phase.NAME) {
             if (mH.buf.readableBytes() >= mH.nameLength) {
-                byte[] fileName = new byte[mH.nameLength];
-                mH.buf.readBytes(fileName);
-                System.out.println("STATE: Filename received - " + new String(fileName, StandardCharsets.UTF_8));
-                mH.path = Paths.get("server_storage", new String(fileName));
+                byte[] fileNameBytes = new byte[mH.nameLength];
+                mH.buf.readBytes(fileNameBytes);
+                mH.fileName = new String(fileNameBytes, StandardCharsets.UTF_8);
+                System.out.println("STATE: Filename received - " + mH.fileName);
+                mH.path = Paths.get("server_storage", mH.fileName);
                 mH.currentPhase = Phase.VERIFY_FILE_PRESENCE;
             } else return false;
         }
@@ -73,7 +72,15 @@ public class DownloadCommandReceivedStateOfMainHandler implements State {
             ctx.writeAndFlush(mH.bufOut);
             // Despatch of the file from server to client
             FileRegion region = new DefaultFileRegion(mH.path.toFile(), 0, Files.size(mH.path));
-            ctx.writeAndFlush(region);
+            ChannelFuture channelFuture = ctx.writeAndFlush(region);
+            channelFuture.addListener(new ChannelFutureListener() {
+                @Override
+                public void operationComplete(ChannelFuture future) throws Exception {
+                    if (future.isSuccess())
+                        System.out.printf("File %s has been successfully sent from server to client.\n", mH.fileName);
+                    else future.cause().printStackTrace();
+                }
+            });
             mH.currentPhase = Phase.IDLE;
         }
 
