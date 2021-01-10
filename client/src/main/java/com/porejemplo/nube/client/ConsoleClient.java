@@ -16,20 +16,23 @@ public class ConsoleClient {
 
     public static final int PORT = 8189;
     public static final String HOST = "localhost";
+    final String STORAGE_ROOT = "client_storage";
 
     private final Scanner scanner = new Scanner(System.in);
 
     private boolean authOk = false;
     private AuthRegCommandHandler authRegCommandHandler;
     private MainCommandHandler mainCommandHandler;
+    private String username;
 
     public ConsoleClient() {
         try (Socket socket = new Socket(HOST, PORT);
              DataOutputStream out = new DataOutputStream(socket.getOutputStream());
              DataInputStream in = new DataInputStream(socket.getInputStream());) {
 
-            authRegCommandHandler = new AuthRegCommandHandler(this);
-            mainCommandHandler = new MainCommandHandler(this, new IOUploadService(out), new IODownloadService(out, in));
+//            authRegCommandHandler = new AuthRegCommandHandler(this);
+            authRegCommandHandler = new AuthRegCommandHandler(this, out, in);
+//            mainCommandHandler = new MainCommandHandler(this, new IOUploadService(out), new IODownloadService(out, in));
             scanner.useDelimiter("\\n");
             runClient(out, in);
 
@@ -38,6 +41,22 @@ public class ConsoleClient {
         } finally {
             scanner.close();
         }
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public MainCommandHandler getMainCommandHandler() {
+        return mainCommandHandler;
+    }
+
+    public void setMainCommandHandler(MainCommandHandler mainCommandHandler) {
+        this.mainCommandHandler = mainCommandHandler;
     }
 
     public boolean isAuthOk() {
@@ -65,7 +84,7 @@ public class ConsoleClient {
             } catch (ArgumentException e) {
                 System.out.println(e.getMessage());
             }
-            
+
             if (response.equals("exit")) {
                 break;
             }

@@ -1,25 +1,39 @@
 package com.porejemplo.nube.client;
 
+import com.porejemplo.nube.client.service.IODownloadService;
+import com.porejemplo.nube.client.service.IOUploadService;
 import com.porejemplo.nube.common.ArgumentException;
 import com.porejemplo.nube.common.Command;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 public class AuthRegCommandHandler {
 
     private final ConsoleClient consoleClient;
+    private DataOutputStream out;
+    private DataInputStream in;
 
-    public AuthRegCommandHandler(ConsoleClient consoleClient) {
+    public AuthRegCommandHandler(ConsoleClient consoleClient, DataOutputStream out, DataInputStream in) {
         this.consoleClient = consoleClient;
+        this.out = out;
+        this.in = in;
     }
 
     void handle(DataOutputStream outputStream, DataInputStream inputStream, Command command, List<String> arguments) throws ArgumentException, IOException {
         command.checkArguments(arguments);
         switch (command) {
             case LOGIN:
-                if (areUsernameAndPasswordCorrectForCloud(outputStream, inputStream, arguments.get(0), arguments.get(1)))
+                if (areUsernameAndPasswordCorrectForCloud(outputStream, inputStream, arguments.get(0), arguments.get(1))) {
+                    consoleClient.setUsername(arguments.get(0));
+                    Path path = Paths.get(consoleClient.STORAGE_ROOT, consoleClient.getUsername());
+                    if (Files.notExists(path)) Files.createDirectory(path);
+                    consoleClient.setMainCommandHandler(new MainCommandHandler(consoleClient, out, in));
                     consoleClient.setAuthOk(true);
+                }
                 break;
             case REG:
                 System.out.println("The command register is under development.");

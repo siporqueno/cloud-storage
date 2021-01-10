@@ -1,6 +1,8 @@
 package com.porejemplo.nube.client;
 
 import com.porejemplo.nube.client.service.DownloadService;
+import com.porejemplo.nube.client.service.IODownloadService;
+import com.porejemplo.nube.client.service.IOUploadService;
 import com.porejemplo.nube.client.service.UploadService;
 import com.porejemplo.nube.common.ArgumentException;
 import com.porejemplo.nube.common.Command;
@@ -19,19 +21,20 @@ public class MainCommandHandler {
     private final ConsoleClient consoleClient;
     private final UploadService uploadService;
     private final DownloadService downloadService;
+    private Path pathToUserDir;
 
-    public MainCommandHandler(ConsoleClient consoleClient, UploadService uploadService, DownloadService downloadService) {
+    public MainCommandHandler(ConsoleClient consoleClient, DataOutputStream out, DataInputStream in) {
         this.consoleClient = consoleClient;
-        this.uploadService = uploadService;
-        this.downloadService = downloadService;
+        this.pathToUserDir = Paths.get(consoleClient.STORAGE_ROOT, consoleClient.getUsername());
+        this.downloadService = new IODownloadService(out, in, this.pathToUserDir);
+        this.uploadService = new IOUploadService(out);
     }
 
     void handle(DataOutputStream outputStream, DataInputStream inputStream, Command command, List<String> arguments) throws ArgumentException, IOException {
         command.checkArguments(arguments);
         switch (command) {
             case LSLC:
-                Path pathStorage = Paths.get("client_storage");
-                String fileNamesString = Files.list(pathStorage)
+                String fileNamesString = Files.list(pathToUserDir)
                         .map(path -> path.getFileName().toString())
                         .collect(Collectors.joining(" "));
                 System.out.println(fileNamesString);
@@ -40,7 +43,7 @@ public class MainCommandHandler {
                 obtainCloudFileNames(outputStream, inputStream);
                 break;
             case UPLD:
-                Path path = Paths.get("client_storage", arguments.get(0));
+                Path path = Paths.get(pathToUserDir.toString(), arguments.get(0));
                 if (Files.notExists(path, LinkOption.NOFOLLOW_LINKS)) {
                     System.out.println("Such file does not exist");
                 } else performUpload(path);
@@ -49,15 +52,15 @@ public class MainCommandHandler {
                 performDownload(Paths.get("server_storage", arguments.get(0)));
                 break;
             case RMLC:
-                Path pathToFileToBeRenamed = Paths.get("client_storage", arguments.get(0));
-                Path pathToRenamedFile = Paths.get("client_storage", arguments.get(1));
+                Path pathToFileToBeRenamed = Paths.get(pathToUserDir.toString(), arguments.get(0));
+                Path pathToRenamedFile = Paths.get(pathToUserDir.toString(), arguments.get(1));
                 Files.move(pathToFileToBeRenamed, pathToRenamedFile);
                 break;
             case RMCL:
                 renameFileInCloud(outputStream, inputStream, arguments.get(0), arguments.get(1));
                 break;
             case DELLC:
-                Path pathToFileToBeDeleted = Paths.get("client_storage", arguments.get(0));
+                Path pathToFileToBeDeleted = Paths.get(pathToUserDir.toString(), arguments.get(0));
                 Files.deleteIfExists(pathToFileToBeDeleted);
                 break;
             case DELCL:

@@ -11,10 +11,12 @@ import static com.porejemplo.nube.common.Command.DNLD;
 public class IODownloadService implements DownloadService {
     private final DataOutput out;
     private final DataInput in;
+    private final Path pathToUserDir;
 
-    public IODownloadService(DataOutput out, DataInput in) {
+    public IODownloadService(DataOutput out, DataInput in, Path pathToUserDir) {
         this.out = out;
         this.in = in;
+        this.pathToUserDir = pathToUserDir;
     }
 
     @Override
@@ -32,7 +34,7 @@ public class IODownloadService implements DownloadService {
             return false;
         }
         long fileSize = in.readLong();
-        Path pathToFileToBeDownloaded = Paths.get("client_storage", fileName);
+        Path pathToFileToBeDownloaded = Paths.get(pathToUserDir.toString(), fileName);
         try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(pathToFileToBeDownloaded.toFile()))) {
             for (long i = 0; i < fileSize; i++) {
                 bos.write(in.readByte());

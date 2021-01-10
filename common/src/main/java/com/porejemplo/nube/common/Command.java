@@ -48,6 +48,7 @@ public enum Command {
     }
 
     public static Command findCommandBySignalByte(byte receivedSignalByte) throws Exception {
-        return Arrays.stream(Command.values()).filter(c -> c.signalByte == receivedSignalByte).findFirst().orElseThrow(() -> new Exception("Oops"));
+        return Arrays.stream(Command.values()).filter(c -> c.signalByte == receivedSignalByte).findFirst().orElseThrow(() ->
+                new Exception(String.format("Oops. Exception has been thrown during call of method Command.findCommandBySignalBythe with argument %d", receivedSignalByte)));
     }
 }
