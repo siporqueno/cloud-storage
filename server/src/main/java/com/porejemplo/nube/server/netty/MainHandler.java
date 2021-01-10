@@ -23,17 +23,14 @@ public class MainHandler extends ChannelInboundHandlerAdapter {
     State currentState;
 
     Phase currentPhase = Phase.IDLE;
-    int nameLength;
-    int newNameLength;
+    int nameLength, newNameLength;
     long fileLength;
-    String fileName;
+    String fileName, newFileName;
     long receivedFileLength;
     BufferedOutputStream out;
-    Path path;
-    Path newPath;
+    Path path, newPath;
     byte signalByte;
-    ByteBuf buf;
-    ByteBuf bufOut;
+    ByteBuf buf, bufOut;
 
     public MainHandler(AuthHandler authHandler) {
         this.aH = authHandler;

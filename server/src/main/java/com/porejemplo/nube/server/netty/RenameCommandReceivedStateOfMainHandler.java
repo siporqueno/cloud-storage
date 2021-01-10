@@ -46,15 +46,17 @@ public class RenameCommandReceivedStateOfMainHandler implements State {
 
         if (mH.currentPhase == Phase.NAME_AND_NEW_NAME) {
             if (mH.buf.readableBytes() >= mH.nameLength + mH.newNameLength) {
-                byte[] fileName = new byte[mH.nameLength];
-                mH.buf.readBytes(fileName);
-                System.out.println("STATE: Filename received - " + new String(fileName, StandardCharsets.UTF_8));
-                mH.path = Paths.get("server_storage", new String(fileName));
+                byte[] fileNameBytes = new byte[mH.nameLength];
+                mH.buf.readBytes(fileNameBytes);
+                mH.fileName = new String(fileNameBytes, StandardCharsets.UTF_8);
+                System.out.println("STATE: Filename received - " + mH.fileName);
+                mH.path = Paths.get(mH.aH.pathToUserDir.toString(), mH.fileName);
 
-                byte[] newFileName = new byte[mH.newNameLength];
-                mH.buf.readBytes(newFileName);
-                System.out.println("STATE: New filename received - " + new String(newFileName, StandardCharsets.UTF_8));
-                mH.newPath = Paths.get("server_storage", new String(newFileName));
+                byte[] newFileNameBytes = new byte[mH.newNameLength];
+                mH.buf.readBytes(newFileNameBytes);
+                mH.newFileName = new String(newFileNameBytes, StandardCharsets.UTF_8);
+                System.out.println("STATE: New filename received - " + mH.newFileName);
+                mH.newPath = Paths.get(mH.aH.pathToUserDir.toString(), mH.newFileName);
 
                 mH.currentPhase = Phase.VERIFY_FILE_PRESENCE;
             } else return false;

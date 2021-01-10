@@ -6,7 +6,11 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelHandlerContext;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.attribute.FileAttribute;
 
 public class UnauthLoginCommandReceivedStateOfAuthHandler implements State {
 
@@ -60,6 +64,16 @@ public class UnauthLoginCommandReceivedStateOfAuthHandler implements State {
         if (aH.currentPhase == Phase.VERIFY_USERNAME_AND_PASSWORD) {
             System.out.println("STATE: username and password verification ");
             if (AuthService.verifyUsernameAndPassword(aH.username, aH.password)) {
+                aH.pathToUserDir = Paths.get(aH.STORAGE_ROOT, aH.username);
+                if (Files.notExists(aH.pathToUserDir)) {
+                    try {
+                        Files.createDirectory(aH.pathToUserDir);
+                    } catch (IOException e) {
+                        System.out.println("This IO exception is caused by an attempt to create user directory.");
+                        e.printStackTrace();
+                    }
+                }
+
                 aH.bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
                 aH.bufOut.writeByte(Command.LOGIN.getSignalByte());
                 ctx.writeAndFlush(aH.bufOut);

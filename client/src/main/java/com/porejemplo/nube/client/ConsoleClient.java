@@ -55,7 +55,6 @@ public class ConsoleClient {
             String response = scanner.next();
             String[] respTokens = response.split(" ");
             try {
-
                 Command command = Command.valueOf(respTokens[0].toUpperCase());
                 List<String> arguments = Arrays.stream(respTokens).skip(1).collect(Collectors.toList());
                 if (authOk) mainCommandHandler.handle(outputStream, inputStream, command, arguments);

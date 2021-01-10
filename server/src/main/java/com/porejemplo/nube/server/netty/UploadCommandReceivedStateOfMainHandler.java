@@ -36,10 +36,11 @@ public class UploadCommandReceivedStateOfMainHandler implements State {
 
         if (mH.currentPhase == Phase.NAME) {
             if (mH.buf.readableBytes() >= mH.nameLength) {
-                byte[] fileName = new byte[mH.nameLength];
-                mH.buf.readBytes(fileName);
-                System.out.println("STATE: Filename received - " + new String(fileName, StandardCharsets.UTF_8));
-                mH.path = Paths.get("server_storage", new String(fileName));
+                byte[] fileNameBytes = new byte[mH.nameLength];
+                mH.buf.readBytes(fileNameBytes);
+                mH.fileName = new String(fileNameBytes, StandardCharsets.UTF_8);
+                System.out.println("STATE: Filename received - " + mH.fileName);
+                mH.path = Paths.get(mH.aH.pathToUserDir.toString(), mH.fileName);
                 mH.out = new BufferedOutputStream(new FileOutputStream(mH.path.toFile()));
                 mH.currentPhase = Phase.FILE_LENGTH;
             } else return false;

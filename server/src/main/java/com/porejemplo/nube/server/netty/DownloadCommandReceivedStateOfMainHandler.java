@@ -41,7 +41,8 @@ public class DownloadCommandReceivedStateOfMainHandler implements State {
                 mH.buf.readBytes(fileNameBytes);
                 mH.fileName = new String(fileNameBytes, StandardCharsets.UTF_8);
                 System.out.println("STATE: Filename received - " + mH.fileName);
-                mH.path = Paths.get("server_storage", mH.fileName);
+                mH.path = Paths.get(mH.aH.pathToUserDir.toString(),
+                        mH.fileName);
                 mH.currentPhase = Phase.VERIFY_FILE_PRESENCE;
             } else return false;
         }

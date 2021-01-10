@@ -33,8 +33,7 @@ public class ListCommandReceivedStateOfMainHandler implements State {
             mH.bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
             mH.bufOut.writeByte(Command.LSCL.getSignalByte());
             ctx.writeAndFlush(mH.bufOut);
-            Path pathStorage = Paths.get("server_storage");
-            String fileNamesString=Files.list(pathStorage)
+            String fileNamesString = Files.list(mH.aH.pathToUserDir)
                     .map(path -> path.getFileName().toString())
                     .collect(Collectors.joining(" "));
             int listLength = fileNamesString.length();

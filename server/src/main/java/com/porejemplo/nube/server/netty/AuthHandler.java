@@ -1,16 +1,16 @@
 package com.porejemplo.nube.server.netty;
 
-import com.porejemplo.nube.common.Command;
-import com.porejemplo.nube.server.auth.service.AuthService;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 
 public class AuthHandler extends ChannelInboundHandlerAdapter {
+
+    final String STORAGE_ROOT = "server_storage";
 
     State unauthNoCommandReceivedStateOfAuthHandler;
     State unauthLoginCommandReceivedStateOfAuthHandler;
@@ -21,11 +21,11 @@ public class AuthHandler extends ChannelInboundHandlerAdapter {
     ByteBuf bufOut;
     Phase currentPhase = Phase.IDLE;
     byte signalByte;
-    long receivedFileLength;
     int usernameLength;
     int passwordLength;
     String username;
     String password;
+    Path pathToUserDir;
 
     public AuthHandler() {
         this.unauthNoCommandReceivedStateOfAuthHandler = new UnauthNoCommandReceivedStateOfAuthHandler(this);
