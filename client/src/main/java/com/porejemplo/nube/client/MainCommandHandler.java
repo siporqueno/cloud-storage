@@ -49,7 +49,7 @@ public class MainCommandHandler {
                 } else performUpload(path);
                 break;
             case DNLD:
-                performDownload(Paths.get("server_storage", arguments.get(0)));
+                performDownload(arguments.get(0));
                 break;
             case RMLC:
                 Path pathToFileToBeRenamed = Paths.get(pathToUserDir.toString(), arguments.get(0));
@@ -81,8 +81,8 @@ public class MainCommandHandler {
         return uploadService.upload(path);
     }
 
-    private boolean performDownload(Path path) throws IOException {
-        return downloadService.download(path);
+    private boolean performDownload(String fileName) throws IOException {
+        return downloadService.download(fileName);
     }
 
     private void obtainCloudFileNames(DataOutputStream out, DataInputStream in) throws IOException {

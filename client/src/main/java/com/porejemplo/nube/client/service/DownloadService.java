@@ -4,5 +4,5 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 public interface DownloadService {
-    boolean download(Path path) throws IOException;
+    boolean download(String fileName) throws IOException;
 }

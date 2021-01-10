@@ -20,9 +20,8 @@ public class IODownloadService implements DownloadService {
     }
 
     @Override
-    public boolean download(Path path) throws IOException {
+    public boolean download(String fileName) throws IOException {
         out.writeByte(DNLD.getSignalByte());
-        String fileName = path.getFileName().toString();
         int fileNameLength = fileName.length();
         out.writeInt(fileNameLength);
         out.write(fileName.getBytes());
