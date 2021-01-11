@@ -25,3 +25,6 @@ Deletes file file_name in the local storage
 
 delcl file_name
 Deletes file file_name in the cloud storage
+
+exit
+Exits the client.

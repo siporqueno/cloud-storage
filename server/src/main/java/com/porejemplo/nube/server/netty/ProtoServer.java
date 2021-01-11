@@ -20,7 +20,8 @@ public class ProtoServer {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         public void initChannel(SocketChannel ch) {
-                            ch.pipeline().addLast(new ProtoHandler());
+                            ch.pipeline()
+                                    .addLast(new MainHandler());
                         }
                     });
             ChannelFuture f = b.bind(8189).sync();

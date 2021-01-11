@@ -9,15 +9,14 @@ import io.netty.channel.FileRegion;
 
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class ProtoHandler extends ChannelInboundHandlerAdapter {
+public class ProtoHandlerOldMonolith extends ChannelInboundHandlerAdapter {
 
-    private State currentState = State.IDLE;
+    private Phase currentPhase = Phase.IDLE;
     private int nameLength;
     private int newNameLength;
     private long fileLength;
@@ -42,30 +41,30 @@ public class ProtoHandler extends ChannelInboundHandlerAdapter {
         m.release();
 
         while (buf.readableBytes() > 0) {
-            if (currentState == State.IDLE) {
+            if (currentPhase == Phase.IDLE) {
                 signalByte = buf.readByte();
                 switch (signalByte) {
                     case 14:
-                        currentState = State.FILES_LIST;
+                        currentPhase = Phase.FILES_LIST;
                         System.out.println("STATE: Start to obtain file list in server");
                         break;
                     case 15:
-                        currentState = State.NAME_LENGTH;
+                        currentPhase = Phase.NAME_LENGTH;
                         receivedFileLength = 0L;
                         System.out.println("STATE: Start of file upload");
                         break;
                     case 16:
-                        currentState = State.NAME_LENGTH;
+                        currentPhase = Phase.NAME_LENGTH;
                         receivedFileLength = 0L;
                         System.out.println("STATE: Start of file download");
                         break;
                     case 18:
 //                        currentState = State.NAME_AND_NEW_NAME_LENGTH;
-                        currentState = State.NAME_LENGTH;
+                        currentPhase = Phase.NAME_LENGTH;
                         System.out.println("STATE: Start of file renaming");
                         break;
                     case 19:
-                        currentState = State.NAME_LENGTH;
+                        currentPhase = Phase.NAME_LENGTH;
                         System.out.println("STATE: Start of file deleting");
                         break;
                     default:
@@ -74,22 +73,22 @@ public class ProtoHandler extends ChannelInboundHandlerAdapter {
             }
 
 
-            if (currentState == State.NAME_LENGTH) {
+            if (currentPhase == Phase.NAME_LENGTH) {
                 System.out.println("inside if NAME_LENGTH " + buf.readableBytes());
                 if (buf.readableBytes() >= 4) {
                     System.out.println("STATE: Getting filename length");
                     nameLength = buf.readInt();
-                    if (signalByte == 18) currentState = State.NEW_NAME_LENGTH;
-                    else currentState = State.NAME;
+                    if (signalByte == 18) currentPhase = Phase.NEW_NAME_LENGTH;
+                    else currentPhase = Phase.NAME;
                 } else break;
             }
 
-            if (currentState == State.NEW_NAME_LENGTH) {
+            if (currentPhase == Phase.NEW_NAME_LENGTH) {
                 System.out.println("inside if NEW_NAME_LENGTH " + buf.readableBytes());
                 if (buf.readableBytes() >= 4) {
                     System.out.println("STATE: Getting new filename length");
                     newNameLength = buf.readInt();
-                    currentState = State.NAME_AND_NEW_NAME;
+                    currentPhase = Phase.NAME_AND_NEW_NAME;
                 } else break;
             }
 
@@ -103,7 +102,7 @@ public class ProtoHandler extends ChannelInboundHandlerAdapter {
                 }
             }*/
 
-            if (currentState == State.NAME) {
+            if (currentPhase == Phase.NAME) {
                 if (buf.readableBytes() >= nameLength) {
                     byte[] fileName = new byte[nameLength];
                     buf.readBytes(fileName);
@@ -111,14 +110,14 @@ public class ProtoHandler extends ChannelInboundHandlerAdapter {
                     path = Paths.get("server_storage", new String(fileName));
                     if (signalByte == 15) {
                         out = new BufferedOutputStream(new FileOutputStream(path.toFile()));
-                        currentState = State.FILE_LENGTH;
+                        currentPhase = Phase.FILE_LENGTH;
                     } else if (signalByte == 16 || signalByte == 19) {
-                        currentState = State.VERIFY_FILE_PRESENCE;
+                        currentPhase = Phase.VERIFY_FILE_PRESENCE;
                     }
                 } else break;
             }
 
-            if (currentState == State.NAME_AND_NEW_NAME) {
+            if (currentPhase == Phase.NAME_AND_NEW_NAME) {
                 if (buf.readableBytes() >= nameLength + newNameLength) {
                     byte[] fileName = new byte[nameLength];
                     buf.readBytes(fileName);
@@ -130,25 +129,25 @@ public class ProtoHandler extends ChannelInboundHandlerAdapter {
                     System.out.println("STATE: New filename received - " + new String(newFileName, "UTF-8"));
                     newPath = Paths.get("server_storage", new String(newFileName));
 
-                    currentState = State.VERIFY_FILE_PRESENCE;
+                    currentPhase = Phase.VERIFY_FILE_PRESENCE;
                 } else break;
             }
 
-            if (currentState == State.FILE_LENGTH) {
+            if (currentPhase == Phase.FILE_LENGTH) {
                 if (buf.readableBytes() >= 8) {
                     fileLength = buf.readLong();
                     System.out.println("STATE: File length received - " + fileLength);
-                    currentState = State.FILE;
+                    currentPhase = Phase.FILE;
                 } else break;
             }
 
-            if (currentState == State.FILE) {
+            if (currentPhase == Phase.FILE) {
                 while (buf.readableBytes() > 0) {
                     out.write(buf.readByte());
                     receivedFileLength++;
                     System.out.println(receivedFileLength);
                     if (fileLength == receivedFileLength) {
-                        currentState = State.IDLE;
+                        currentPhase = Phase.IDLE;
                         System.out.println("File received");
                         out.close();
                         break;
@@ -156,7 +155,7 @@ public class ProtoHandler extends ChannelInboundHandlerAdapter {
                 }
             }
 
-            if (currentState == State.VERIFY_FILE_PRESENCE) {
+            if (currentPhase == Phase.VERIFY_FILE_PRESENCE) {
                 System.out.println("STATE: File presence verification ");
                 if (Files.exists(path)) {
                     bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
@@ -164,36 +163,36 @@ public class ProtoHandler extends ChannelInboundHandlerAdapter {
                         System.out.println("File name verified");
                         bufOut.writeByte((byte) 16);
                         ctx.writeAndFlush(bufOut);
-                        currentState = State.FILE_DESPATCH;
+                        currentPhase = Phase.FILE_DESPATCH;
                     } else if (signalByte == 18) {
                         System.out.println("File name verified");
-                        currentState = State.RENAME_FILE;
+                        currentPhase = Phase.RENAME_FILE;
                     } else if (signalByte == 19) {
                         System.out.println("File name verified");
-                        currentState = State.DELETE_FILE;
+                        currentPhase = Phase.DELETE_FILE;
                     }
                 } else {
                     bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
                     bufOut.writeByte((byte) 17);
                     ctx.writeAndFlush(bufOut);
                     System.out.println("File name not verified. No such file");
-                    currentState = State.IDLE;
+                    currentPhase = Phase.IDLE;
                 }
             }
 
-            if (currentState == State.FILE_DESPATCH) {
-                System.out.println("STATE: File download");
+            if (currentPhase == Phase.FILE_DESPATCH) {
+                System.out.println("STATE: File download"+Files.size(path));
                 bufOut = ByteBufAllocator.DEFAULT.directBuffer(8);
                 bufOut.writeLong(Files.size(path));
                 ctx.writeAndFlush(bufOut);
                 // Despatch of the file from server to client
                 FileRegion region = new DefaultFileRegion(path.toFile(), 0, Files.size(path));
                 ctx.writeAndFlush(region);
-                currentState = State.IDLE;
+                currentPhase = Phase.IDLE;
                 break;
             }
 
-            if (currentState == State.FILES_LIST) {
+            if (currentPhase == Phase.FILES_LIST) {
                 System.out.println("STATE: Forming and sending to client files list");
                 bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
                 bufOut.writeByte((byte) 14);
@@ -211,27 +210,27 @@ public class ProtoHandler extends ChannelInboundHandlerAdapter {
                 bufOut = ByteBufAllocator.DEFAULT.directBuffer(stringHelper.length() * 2);
                 bufOut.writeCharSequence(stringHelper, StandardCharsets.UTF_8);
                 ctx.writeAndFlush(bufOut);
-                currentState = State.IDLE;
+                currentPhase = Phase.IDLE;
                 break;
             }
 
-            if (currentState == State.RENAME_FILE) {
+            if (currentPhase == Phase.RENAME_FILE) {
                 System.out.println("STATE: File renaming");
                 Files.move(path, newPath);
                 bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
                 bufOut.writeByte((byte) 18);
                 ctx.writeAndFlush(bufOut);
-                currentState = State.IDLE;
+                currentPhase = Phase.IDLE;
                 break;
             }
 
-            if (currentState == State.DELETE_FILE) {
+            if (currentPhase == Phase.DELETE_FILE) {
                 System.out.println("STATE: File deleting");
                 Files.delete(path);
                 bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
                 bufOut.writeByte((byte) 19);
                 ctx.writeAndFlush(bufOut);
-                currentState = State.IDLE;
+                currentPhase = Phase.IDLE;
                 break;
             }
         }
