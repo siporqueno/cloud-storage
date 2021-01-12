@@ -16,7 +16,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MainCommandHandler {
+public class MainCommandHandler extends CommandHandler {
 
     private final ConsoleClient consoleClient;
     private final UploadService uploadService;
@@ -31,6 +31,7 @@ public class MainCommandHandler {
     }
 
     void handle(DataOutputStream outputStream, DataInputStream inputStream, Command command, List<String> arguments) throws ArgumentException, IOException {
+        super.handle(outputStream, inputStream, command, arguments);
         command.checkArguments(arguments);
         switch (command) {
             case LSLC:

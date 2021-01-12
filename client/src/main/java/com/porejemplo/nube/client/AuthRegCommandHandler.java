@@ -11,7 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-public class AuthRegCommandHandler {
+public class AuthRegCommandHandler extends CommandHandler {
 
     private final ConsoleClient consoleClient;
     private DataOutputStream out;
@@ -24,6 +24,7 @@ public class AuthRegCommandHandler {
     }
 
     void handle(DataOutputStream outputStream, DataInputStream inputStream, Command command, List<String> arguments) throws ArgumentException, IOException {
+        super.handle(outputStream, inputStream, command, arguments);
         command.checkArguments(arguments);
         switch (command) {
             case LOGIN:

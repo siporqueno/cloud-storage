@@ -16,7 +16,8 @@ public enum Command {
     EXIT("exit", "exit\nExits the client.", 0, (byte) -1, (byte) -1),
     LOGIN("login", "login username password\nLogs in.", 2, (byte) 20, (byte) 21),
     LOGOUT("logout", "logout\nLogs out.", 0, (byte) 22, (byte) 23),
-    REG("register", "register username password nickname\nRegisters new user.", 0, (byte) 24, (byte) 25);
+    REG("register", "register username password nickname\nRegisters new user.", 0, (byte) 24, (byte) 25),
+    HELP("help", "help\nPrints all the commands.", 0, (byte) -1, (byte) -1);
 
     private final String name;
     private final String description;
@@ -38,6 +39,10 @@ public enum Command {
 
     public byte getFailureByte() {
         return failureByte;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     public boolean checkArguments(List<String> arguments) throws ArgumentException {
