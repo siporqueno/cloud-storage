@@ -30,9 +30,7 @@ public class ConsoleClient {
              DataOutputStream out = new DataOutputStream(socket.getOutputStream());
              DataInputStream in = new DataInputStream(socket.getInputStream());) {
 
-//            authRegCommandHandler = new AuthRegCommandHandler(this);
             authRegCommandHandler = new AuthRegCommandHandler(this, out, in);
-//            mainCommandHandler = new MainCommandHandler(this, new IOUploadService(out), new IODownloadService(out, in));
             scanner.useDelimiter("\\n");
             runClient(out, in);
 

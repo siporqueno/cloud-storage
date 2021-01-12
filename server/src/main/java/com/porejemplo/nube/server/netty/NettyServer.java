@@ -9,7 +9,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
-public class ProtoServer {
+public class NettyServer {
 
     public void run() throws Exception {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
@@ -36,6 +36,6 @@ public class ProtoServer {
     }
 
     public static void main(String[] args) throws Exception {
-        new ProtoServer().run();
+        new NettyServer().run();
     }
 }
