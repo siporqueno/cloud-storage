@@ -16,7 +16,6 @@ public abstract class CommandHandler {
                 help();
                 break;
             default:
-                System.out.println("Such command is not available (You are logged in).");
         }
     }
 

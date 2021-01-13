@@ -68,7 +68,7 @@ public class ConsoleClient {
     private void runClient(DataOutputStream outputStream, DataInputStream inputStream) throws IOException {
         System.out.println("Welcome to Cloud storage client!");
         while (true) {
-            System.out.printf("Enter a command (You are logged %s now).\n", (authOk) ? "in" : "out");
+            System.out.printf("Enter a command (You are logged %s now).\n", (authOk) ? "in as " + username : "out");
             String response = scanner.next();
             String[] respTokens = response.split(" ");
             try {
