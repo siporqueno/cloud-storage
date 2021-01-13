@@ -24,14 +24,11 @@ public class LogoutCommandReceivedStateOfMainHandler implements State {
     public boolean processCommand(ChannelHandlerContext ctx) throws IOException {
 
         if (mH.currentPhase == Phase.LOGOUT) {
-            System.out.println("inside if LOGOUT");
-            // The below commented line is compatible with AuthHandlerOldMonolith class where there are no states and field authOk is present.
-//            mH.aH.authOk = false;
             mH.aH.currentState = mH.aH.unauthNoCommandReceivedStateOfAuthHandler;
             mH.bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
             mH.bufOut.writeByte(Command.LOGOUT.getSignalByte());
             ctx.writeAndFlush(mH.bufOut.retain());
-            System.out.println("STATE: Logging out");
+            MainHandler.LOGGER.info("STATE: Logging out");
             ctx.pipeline().remove(mH);
         }
 

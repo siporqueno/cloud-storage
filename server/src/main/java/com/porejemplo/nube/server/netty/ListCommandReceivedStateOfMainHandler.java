@@ -29,7 +29,7 @@ public class ListCommandReceivedStateOfMainHandler implements State {
     public boolean processCommand(ChannelHandlerContext ctx) throws IOException {
 
         if (mH.currentPhase == Phase.FILES_LIST) {
-            System.out.println("STATE: Forming and sending to client files list");
+            MainHandler.LOGGER.info("STATE: Forming and sending to client files list");
             mH.bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
             mH.bufOut.writeByte(Command.LSCL.getSignalByte());
             ctx.writeAndFlush(mH.bufOut);
@@ -40,7 +40,6 @@ public class ListCommandReceivedStateOfMainHandler implements State {
             mH.bufOut = ByteBufAllocator.DEFAULT.directBuffer(4);
             mH.bufOut.writeInt(listLength);
             ctx.writeAndFlush(mH.bufOut);
-            System.out.println(listLength);
 
             mH.bufOut = ByteBufAllocator.DEFAULT.directBuffer(listLength * 2);
             mH.bufOut.writeCharSequence(fileNamesString, StandardCharsets.UTF_8);

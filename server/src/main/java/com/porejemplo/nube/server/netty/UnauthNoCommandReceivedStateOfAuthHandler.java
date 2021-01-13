@@ -1,7 +1,6 @@
 package com.porejemplo.nube.server.netty;
 
 import com.porejemplo.nube.common.Command;
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 
 public class UnauthNoCommandReceivedStateOfAuthHandler implements State {
@@ -25,10 +24,10 @@ public class UnauthNoCommandReceivedStateOfAuthHandler implements State {
             switch (command) {
                 case LOGIN:
                     aH.currentPhase = Phase.USERNAME_LENGTH;
-                    System.out.println("STATE: Start to check username and password.");
+                    AuthHandler.LOGGER.info("STATE: Start to check username and password.");
                     return aH.unauthLoginCommandReceivedStateOfAuthHandler;
                 default:
-                    System.out.println("ERROR: Invalid first byte - " + aH.signalByte);
+                    AuthHandler.LOGGER.info("ERROR: Invalid first byte - " + aH.signalByte);
                     return aH.unauthNoCommandReceivedStateOfAuthHandler;
             }
         }
@@ -37,7 +36,7 @@ public class UnauthNoCommandReceivedStateOfAuthHandler implements State {
 
     @Override
     public boolean processCommand(ChannelHandlerContext ctx) {
-        System.out.println("No command received. Nothing to process.");
+        AuthHandler.LOGGER.info("No command received. Nothing to process.");
         return false;
     }
 }

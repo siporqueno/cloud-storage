@@ -4,11 +4,15 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Path;
 
 public class AuthHandler extends ChannelInboundHandlerAdapter {
+
+    static final Logger LOGGER = LoggerFactory.getLogger(AuthHandler.class);
 
     final String STORAGE_ROOT = "server_storage";
 
@@ -36,7 +40,7 @@ public class AuthHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("AuthHandler added.");
+        LOGGER.info("AuthHandler added.");
         buf = ByteBufAllocator.DEFAULT.directBuffer(1);
         bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
     }
@@ -62,7 +66,7 @@ public class AuthHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("AuthHandler removed.");
+        LOGGER.info("AuthHandler removed.");
         buf.release();
         buf = null;
         if (bufOut.refCnt() > 0) {

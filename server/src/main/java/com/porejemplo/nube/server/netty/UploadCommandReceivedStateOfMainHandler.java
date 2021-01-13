@@ -1,6 +1,5 @@
 package com.porejemplo.nube.server.netty;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.io.BufferedOutputStream;
@@ -26,9 +25,8 @@ public class UploadCommandReceivedStateOfMainHandler implements State {
     public boolean processCommand(ChannelHandlerContext ctx) throws IOException {
 
         if (mH.currentPhase == Phase.NAME_LENGTH) {
-            System.out.println("inside if NAME_LENGTH " + mH.buf.readableBytes());
             if (mH.buf.readableBytes() >= 4) {
-                System.out.println("STATE: Getting filename length");
+                MainHandler.LOGGER.info("STATE: Getting filename length");
                 mH.nameLength = mH.buf.readInt();
                 mH.currentPhase = Phase.NAME;
             } else return false;
@@ -39,7 +37,7 @@ public class UploadCommandReceivedStateOfMainHandler implements State {
                 byte[] fileNameBytes = new byte[mH.nameLength];
                 mH.buf.readBytes(fileNameBytes);
                 mH.fileName = new String(fileNameBytes, StandardCharsets.UTF_8);
-                System.out.println("STATE: Filename received - " + mH.fileName);
+                MainHandler.LOGGER.info("STATE: Filename received - " + mH.fileName);
                 mH.path = Paths.get(mH.aH.pathToUserDir.toString(), mH.fileName);
                 mH.out = new BufferedOutputStream(new FileOutputStream(mH.path.toFile()));
                 mH.currentPhase = Phase.FILE_LENGTH;
@@ -49,21 +47,18 @@ public class UploadCommandReceivedStateOfMainHandler implements State {
         if (mH.currentPhase == Phase.FILE_LENGTH) {
             if (mH.buf.readableBytes() >= 8) {
                 mH.fileLength = mH.buf.readLong();
-                System.out.println("STATE: File length received - " + mH.fileLength);
+                MainHandler.LOGGER.info("STATE: File length received - " + mH.fileLength);
                 mH.currentPhase = Phase.FILE;
             } else return false;
         }
 
         if (mH.currentPhase == Phase.FILE) {
-            System.out.println(mH.buf.capacity());
             while (mH.buf.readableBytes() > 0) {
                 mH.out.write(mH.buf.readByte());
                 mH.receivedFileLength++;
-                System.out.println(mH.receivedFileLength);
                 if (mH.fileLength == mH.receivedFileLength) {
                     mH.currentPhase = Phase.IDLE;
-                    System.out.println("File received");
-                    System.out.println(mH.buf.capacity());
+                    MainHandler.LOGGER.info("File received");
                     mH.out.close();
                     mH.currentState = mH.noCommandReceivedStateOfMainHandler;
                     return true;

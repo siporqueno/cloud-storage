@@ -4,12 +4,16 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 
 public class MainHandler extends ChannelInboundHandlerAdapter {
+
+    static final Logger LOGGER = LoggerFactory.getLogger(MainHandler.class);
 
     AuthHandler aH;
 
@@ -46,7 +50,7 @@ public class MainHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("MainHandler added.");
+        LOGGER.info("MainHandler added.");
         buf = ByteBufAllocator.DEFAULT.directBuffer(1);
         bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
     }
@@ -75,7 +79,7 @@ public class MainHandler extends ChannelInboundHandlerAdapter {
         buf = null;
         bufOut.release();
         bufOut = null;
-        System.out.println("MainHandler removed.");
+        LOGGER.info("MainHandler removed.");
     }
 
     @Override

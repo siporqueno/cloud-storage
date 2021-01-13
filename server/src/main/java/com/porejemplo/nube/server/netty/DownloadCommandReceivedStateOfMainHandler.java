@@ -27,9 +27,8 @@ public class DownloadCommandReceivedStateOfMainHandler implements State {
     public boolean processCommand(ChannelHandlerContext ctx) throws IOException {
 
         if (mH.currentPhase == Phase.NAME_LENGTH) {
-            System.out.println("inside if NAME_LENGTH " + mH.buf.readableBytes());
             if (mH.buf.readableBytes() >= 4) {
-                System.out.println("STATE: Getting filename length");
+                MainHandler.LOGGER.info("STATE: Getting filename length");
                 mH.nameLength = mH.buf.readInt();
                 mH.currentPhase = Phase.NAME;
             } else return false;
@@ -40,7 +39,7 @@ public class DownloadCommandReceivedStateOfMainHandler implements State {
                 byte[] fileNameBytes = new byte[mH.nameLength];
                 mH.buf.readBytes(fileNameBytes);
                 mH.fileName = new String(fileNameBytes, StandardCharsets.UTF_8);
-                System.out.println("STATE: Filename received - " + mH.fileName);
+                MainHandler.LOGGER.info("STATE: Filename received - " + mH.fileName);
                 mH.path = Paths.get(mH.aH.pathToUserDir.toString(),
                         mH.fileName);
                 mH.currentPhase = Phase.VERIFY_FILE_PRESENCE;
@@ -48,10 +47,10 @@ public class DownloadCommandReceivedStateOfMainHandler implements State {
         }
 
         if (mH.currentPhase == Phase.VERIFY_FILE_PRESENCE) {
-            System.out.println("STATE: File presence verification ");
+            MainHandler.LOGGER.info("STATE: File presence verification ");
             if (Files.exists(mH.path)) {
                 mH.bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
-                System.out.println("File name verified");
+                MainHandler.LOGGER.info("File name verified");
                 mH.bufOut.writeByte(Command.DNLD.getSignalByte());
                 ctx.writeAndFlush(mH.bufOut);
                 mH.currentPhase = Phase.FILE_DESPATCH;
@@ -59,7 +58,7 @@ public class DownloadCommandReceivedStateOfMainHandler implements State {
                 mH.bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
                 mH.bufOut.writeByte(Command.DNLD.getFailureByte());
                 ctx.writeAndFlush(mH.bufOut);
-                System.out.println("File name not verified. No such file");
+                MainHandler.LOGGER.info("File name not verified. No such file");
                 mH.currentPhase = Phase.IDLE;
                 mH.currentState = mH.noCommandReceivedStateOfMainHandler;
                 return false;
@@ -67,19 +66,18 @@ public class DownloadCommandReceivedStateOfMainHandler implements State {
         }
 
         if (mH.currentPhase == Phase.FILE_DESPATCH) {
-            System.out.println("STATE: File download");
+            MainHandler.LOGGER.info("STATE: File download");
             mH.bufOut = ByteBufAllocator.DEFAULT.directBuffer(8);
             mH.bufOut.writeLong(Files.size(mH.path));
             ctx.writeAndFlush(mH.bufOut);
-            // Despatch of the file from server to client
             FileRegion region = new DefaultFileRegion(mH.path.toFile(), 0, Files.size(mH.path));
             ChannelFuture channelFuture = ctx.writeAndFlush(region);
             channelFuture.addListener(new ChannelFutureListener() {
                 @Override
                 public void operationComplete(ChannelFuture future) throws Exception {
-                    if (future.isSuccess())
-                        System.out.printf("File %s has been successfully sent from server to client.\n", mH.fileName);
-                    else future.cause().printStackTrace();
+                    if (future.isSuccess()) {
+                        MainHandler.LOGGER.info(String.format("File %s has been successfully sent from server to client.\n", mH.fileName));
+                    } else future.cause().printStackTrace();
                 }
             });
             mH.currentPhase = Phase.IDLE;
