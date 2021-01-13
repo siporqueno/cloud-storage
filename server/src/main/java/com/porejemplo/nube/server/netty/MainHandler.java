@@ -2,6 +2,8 @@ package com.porejemplo.nube.server.netty;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.UnpooledByteBufAllocator;
+import io.netty.buffer.UnpooledDirectByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
@@ -77,7 +79,7 @@ public class MainHandler extends ChannelInboundHandlerAdapter {
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
         buf.release();
         buf = null;
-        bufOut.release();
+        if (bufOut.refCnt() > 0) bufOut.release();
         bufOut = null;
         LOGGER.info("MainHandler removed.");
     }

@@ -69,9 +69,7 @@ public class AuthHandler extends ChannelInboundHandlerAdapter {
         LOGGER.info("AuthHandler removed.");
         buf.release();
         buf = null;
-        if (bufOut.refCnt() > 0) {
-            bufOut.release();
-        }
+        if (bufOut.refCnt() > 0) bufOut.release();
         bufOut = null;
     }
 
