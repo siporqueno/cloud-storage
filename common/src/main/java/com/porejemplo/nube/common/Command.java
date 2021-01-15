@@ -1,7 +1,9 @@
 package com.porejemplo.nube.common;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public enum Command {
 
@@ -18,6 +20,12 @@ public enum Command {
     LOGOUT("logout", "logout\nLogs out.", 0, (byte) 22, (byte) 23),
     REG("register", "register username password nickname\nRegisters new user.", 0, (byte) 24, (byte) 25),
     HELP("help", "help\nPrints all the commands.", 0, (byte) -1, (byte) -1);
+
+    private static final Map<Byte, Command> commands = new HashMap<>();
+
+    static {
+        for (Command value : Command.values()) commands.put(value.getSignalByte(), value);
+    }
 
     private final String name;
     private final String description;
@@ -53,7 +61,8 @@ public enum Command {
     }
 
     public static Command findCommandBySignalByte(byte receivedSignalByte) throws Exception {
-        return Arrays.stream(Command.values()).filter(c -> c.signalByte == receivedSignalByte).findFirst().orElseThrow(() ->
-                new Exception(String.format("Oops. Exception has been thrown during call of method Command.findCommandBySignalBythe with argument %d", receivedSignalByte)));
+        Command command = commands.get(receivedSignalByte);
+        if (command != null) return command;
+        throw new CommandNotFoundException(receivedSignalByte);
     }
 }
