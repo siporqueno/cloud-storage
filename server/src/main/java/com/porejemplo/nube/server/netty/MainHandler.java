@@ -2,8 +2,12 @@ package com.porejemplo.nube.server.netty;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.UnpooledByteBufAllocator;
+import io.netty.buffer.UnpooledDirectByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -11,38 +15,44 @@ import java.nio.file.Path;
 
 public class MainHandler extends ChannelInboundHandlerAdapter {
 
-    State noCommandReceivedState;
-    State listCommandReceivedState;
-    State uploadCommandReceivedState;
-    State downloadCommandReceivedState;
-    State renameCommandReceivedState;
-    State deleteCommandReceivedState;
+    static final Logger LOGGER = LoggerFactory.getLogger(MainHandler.class);
+
+    AuthHandler aH;
+
+    State noCommandReceivedStateOfMainHandler;
+    State listCommandReceivedStateOfMainHandler;
+    State uploadCommandReceivedStateOfMainHandler;
+    State downloadCommandReceivedStateOfMainHandler;
+    State renameCommandReceivedStateOfMainHandler;
+    State deleteCommandReceivedStateOfMainHandler;
+    State logoutCommandReceivedStateOfMainHandler;
     State currentState;
 
     Phase currentPhase = Phase.IDLE;
-    int nameLength;
-    int newNameLength;
+    int nameLength, newNameLength;
     long fileLength;
+    String fileName, newFileName;
     long receivedFileLength;
     BufferedOutputStream out;
-    Path path;
-    Path newPath;
+    Path path, newPath;
     byte signalByte;
-    ByteBuf buf;
-    ByteBuf bufOut;
+    ByteBuf buf, bufOut;
 
-    public MainHandler() {
-        this.noCommandReceivedState = new NoCommandReceivedState(this);
-        this.listCommandReceivedState = new ListCommandReceivedState(this);
-        this.uploadCommandReceivedState = new UploadCommandReceivedState(this);
-        this.downloadCommandReceivedState = new DownloadCommandReceivedState(this);
-        this.renameCommandReceivedState = new RenameCommandReceivedState(this);
-        this.deleteCommandReceivedState = new DeleteCommandReceivedState(this);
-        this.currentState = noCommandReceivedState;
+    public MainHandler(AuthHandler authHandler) {
+        this.aH = authHandler;
+        this.noCommandReceivedStateOfMainHandler = new NoCommandReceivedStateOfMainHandler(this);
+        this.listCommandReceivedStateOfMainHandler = new ListCommandReceivedStateOfMainHandler(this);
+        this.uploadCommandReceivedStateOfMainHandler = new UploadCommandReceivedStateOfMainHandler(this);
+        this.downloadCommandReceivedStateOfMainHandler = new DownloadCommandReceivedStateOfMainHandler(this);
+        this.renameCommandReceivedStateOfMainHandler = new RenameCommandReceivedStateOfMainHandler(this);
+        this.deleteCommandReceivedStateOfMainHandler = new DeleteCommandReceivedStateOfMainHandler(this);
+        this.logoutCommandReceivedStateOfMainHandler = new LogoutCommandReceivedStateOfMainHandler(this);
+        this.currentState = noCommandReceivedStateOfMainHandler;
     }
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+        LOGGER.info("MainHandler added.");
         buf = ByteBufAllocator.DEFAULT.directBuffer(1);
         bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
     }
@@ -58,7 +68,7 @@ public class MainHandler extends ChannelInboundHandlerAdapter {
     }
 
     private State receiveCommand() {
-        return currentState.receiveCommand(signalByte, currentPhase, buf, receivedFileLength);
+        return currentState.receiveCommand();
     }
 
     private boolean processCommand(ChannelHandlerContext ctx) throws IOException {
@@ -69,8 +79,9 @@ public class MainHandler extends ChannelInboundHandlerAdapter {
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
         buf.release();
         buf = null;
-        bufOut.release();
+        if (bufOut.refCnt() > 0) bufOut.release();
         bufOut = null;
+        LOGGER.info("MainHandler removed.");
     }
 
     @Override

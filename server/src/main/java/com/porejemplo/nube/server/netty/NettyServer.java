@@ -1,5 +1,6 @@
 package com.porejemplo.nube.server.netty;
 
+import com.porejemplo.nube.server.auth.service.AuthService;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -8,7 +9,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
-public class ProtoServer {
+public class NettyServer {
 
     public void run() throws Exception {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
@@ -21,18 +22,20 @@ public class ProtoServer {
                         @Override
                         public void initChannel(SocketChannel ch) {
                             ch.pipeline()
-                                    .addLast(new MainHandler());
+                                    .addLast(new AuthHandler());
                         }
                     });
+            AuthService.connect();
             ChannelFuture f = b.bind(8189).sync();
             f.channel().closeFuture().sync();
         } finally {
+            AuthService.disconnect();
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();
         }
     }
 
     public static void main(String[] args) throws Exception {
-        new ProtoServer().run();
+        new NettyServer().run();
     }
 }

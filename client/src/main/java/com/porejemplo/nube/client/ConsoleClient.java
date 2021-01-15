@@ -16,19 +16,22 @@ public class ConsoleClient {
 
     public static final int PORT = 8189;
     public static final String HOST = "localhost";
+    final String STORAGE_ROOT = "client_storage";
 
     private final Scanner scanner = new Scanner(System.in);
 
-    private CommandHandler commandHandler;
+    private boolean authOk = false;
+    private AuthRegCommandHandler authRegCommandHandler;
+    private MainCommandHandler mainCommandHandler;
+    private String username;
 
     public ConsoleClient() {
         try (Socket socket = new Socket(HOST, PORT);
              DataOutputStream out = new DataOutputStream(socket.getOutputStream());
              DataInputStream in = new DataInputStream(socket.getInputStream());) {
 
-            commandHandler = new CommandHandler(new IOUploadService(out), new IODownloadService(out, in));
+            authRegCommandHandler = new AuthRegCommandHandler(this, out, in);
             scanner.useDelimiter("\\n");
-            authenticate();
             runClient(out, in);
 
         } catch (IOException e) {
@@ -38,27 +41,51 @@ public class ConsoleClient {
         }
     }
 
-    private void authenticate() {
-        /*while (true) {
+    public String getUsername() {
+        return username;
+    }
 
-        }*/
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public MainCommandHandler getMainCommandHandler() {
+        return mainCommandHandler;
+    }
+
+    public void setMainCommandHandler(MainCommandHandler mainCommandHandler) {
+        this.mainCommandHandler = mainCommandHandler;
+    }
+
+    public boolean isAuthOk() {
+        return authOk;
+    }
+
+    public void setAuthOk(boolean authOk) {
+        this.authOk = authOk;
     }
 
     private void runClient(DataOutputStream outputStream, DataInputStream inputStream) throws IOException {
-        System.out.println("Welcome to Cloud storage client.");
+        System.out.println("Welcome to Cloud storage client!");
         while (true) {
-            System.out.println("Enter a command");
+            System.out.printf("Enter a command (You are logged %s now).\n", (authOk) ? "in as " + username : "out");
             String response = scanner.next();
             String[] respTokens = response.split(" ");
-            Command command = Command.valueOf(respTokens[0].toUpperCase());
-            List<String> arguments = Arrays.stream(respTokens).skip(1).collect(Collectors.toList());
-
             try {
-                commandHandler.handle(outputStream, inputStream, command, arguments);
+                Command command = Command.valueOf(respTokens[0].toUpperCase());
+                List<String> arguments = Arrays.stream(respTokens).skip(1).collect(Collectors.toList());
+                if (authOk) mainCommandHandler.handle(outputStream, inputStream, command, arguments);
+                else authRegCommandHandler.handle(outputStream, inputStream, command, arguments);
+
+            } catch (IllegalArgumentException e) {
+                System.out.printf("The command %s does not exist!\n", respTokens[0]);
             } catch (ArgumentException e) {
-                e.printStackTrace();
+                System.out.println(e.getMessage());
             }
-            if (response.equals("exit")) break;
+
+            if (response.equals("exit")) {
+                break;
+            }
         }
     }
 
