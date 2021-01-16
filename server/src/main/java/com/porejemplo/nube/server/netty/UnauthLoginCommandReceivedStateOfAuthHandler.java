@@ -2,6 +2,7 @@ package com.porejemplo.nube.server.netty;
 
 import com.porejemplo.nube.common.Command;
 import com.porejemplo.nube.server.auth.service.AuthService;
+import com.porejemplo.nube.server.auth.service.AuthServiceImpl;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelHandlerContext;
 
@@ -13,9 +14,11 @@ import java.nio.file.Paths;
 public class UnauthLoginCommandReceivedStateOfAuthHandler implements State {
 
     private final AuthHandler aH;
+    private final AuthService authService;
 
-    public UnauthLoginCommandReceivedStateOfAuthHandler(AuthHandler aH) {
+    public UnauthLoginCommandReceivedStateOfAuthHandler(AuthHandler aH, AuthService authService) {
         this.aH = aH;
+        this.authService = authService;
     }
 
     @Override
@@ -59,7 +62,7 @@ public class UnauthLoginCommandReceivedStateOfAuthHandler implements State {
 
         if (aH.currentPhase == Phase.VERIFY_USERNAME_AND_PASSWORD) {
             AuthHandler.LOGGER.info("STATE: username and password verification ");
-            if (AuthService.verifyUsernameAndPassword(aH.username, aH.password)) {
+            if (authService.verifyUsernameAndPassword(aH.username, aH.password)) {
                 aH.pathToUserDir = Paths.get(aH.STORAGE_ROOT, aH.username);
                 if (Files.notExists(aH.pathToUserDir)) {
                     try {

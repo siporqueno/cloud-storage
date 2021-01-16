@@ -1,5 +1,6 @@
 package com.porejemplo.nube.server.netty;
 
+import com.porejemplo.nube.server.auth.service.AuthService;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelHandlerContext;
@@ -31,9 +32,9 @@ public class AuthHandler extends ChannelInboundHandlerAdapter {
     String password;
     Path pathToUserDir;
 
-    public AuthHandler() {
+    public AuthHandler(AuthService authService) {
         this.unauthNoCommandReceivedStateOfAuthHandler = new UnauthNoCommandReceivedStateOfAuthHandler(this);
-        this.unauthLoginCommandReceivedStateOfAuthHandler = new UnauthLoginCommandReceivedStateOfAuthHandler(this);
+        this.unauthLoginCommandReceivedStateOfAuthHandler = new UnauthLoginCommandReceivedStateOfAuthHandler(this, authService);
         this.authStateOfAuthHandler = new AuthStateOfAuthHandler(this);
         this.currentState = unauthNoCommandReceivedStateOfAuthHandler;
     }
