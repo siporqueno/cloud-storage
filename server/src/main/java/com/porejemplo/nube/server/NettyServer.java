@@ -1,6 +1,7 @@
-package com.porejemplo.nube.server.netty;
+package com.porejemplo.nube.server;
 
 import com.porejemplo.nube.server.auth.service.AuthService;
+import com.porejemplo.nube.server.netty.AuthHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;

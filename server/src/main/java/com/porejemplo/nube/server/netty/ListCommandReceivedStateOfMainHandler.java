@@ -1,15 +1,12 @@
 package com.porejemplo.nube.server.netty;
 
 import com.porejemplo.nube.common.Command;
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.stream.Collectors;
 
 public class ListCommandReceivedStateOfMainHandler implements State {
