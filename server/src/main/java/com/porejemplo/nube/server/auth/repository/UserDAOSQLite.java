@@ -6,11 +6,7 @@ import java.sql.*;
 import java.util.Optional;
 
 public class UserDAOSQLite implements UserDAO {
-    private final Connection connection;
-
-    public UserDAOSQLite(Connection connection) {
-        this.connection = connection;
-    }
+    private Connection connection;
 
     @Override
     public Optional<User> findUserByUsername(String username) {
@@ -29,6 +25,25 @@ public class UserDAOSQLite implements UserDAO {
             throwables.printStackTrace();
         }
         return Optional.empty();
+    }
+
+    @Override
+    public void connect() throws SQLException {
+        try {
+            Class.forName("org.sqlite.JDBC");
+            connection = DriverManager.getConnection("jdbc:sqlite:server\\mainDb.db");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void disconnect() {
+        try {
+            connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
 }

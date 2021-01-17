@@ -2,6 +2,7 @@ package com.porejemplo.nube.server.auth.repository;
 
 import com.porejemplo.nube.server.auth.entity.User;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -18,5 +19,15 @@ public class UserDAOInMemory implements UserDAO {
     @Override
     public Optional<User> findUserByUsername(String username) {
         return Optional.of(users.get(username));
+    }
+
+    @Override
+    public void connect() throws SQLException {
+
+    }
+
+    @Override
+    public void disconnect() {
+
     }
 }
