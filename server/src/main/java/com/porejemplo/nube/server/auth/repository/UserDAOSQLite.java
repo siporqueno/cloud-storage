@@ -2,6 +2,7 @@ package com.porejemplo.nube.server.auth.repository;
 
 import com.porejemplo.nube.server.auth.entity.User;
 
+import java.nio.file.Paths;
 import java.sql.*;
 import java.util.Optional;
 
@@ -31,7 +32,7 @@ public class UserDAOSQLite implements UserDAO {
     public void connect() throws SQLException {
         try {
             Class.forName("org.sqlite.JDBC");
-            connection = DriverManager.getConnection("jdbc:sqlite:server\\mainDb.db");
+            connection = DriverManager.getConnection(String.format("jdbc:sqlite:%s", Paths.get("server", "mainDb.db").toString()));
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
