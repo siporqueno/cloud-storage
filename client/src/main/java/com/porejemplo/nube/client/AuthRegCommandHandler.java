@@ -43,7 +43,8 @@ public class AuthRegCommandHandler extends CommandHandler {
             case EXIT:
                 break;
             default:
-                System.out.println("Such command is not available (You are logged out).");
+                if (inCommandHandler) inCommandHandler = false;
+                else System.out.println("Such command is not available (You are logged out).");
         }
     }
 

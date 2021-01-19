@@ -75,7 +75,9 @@ public class MainCommandHandler extends CommandHandler {
                 logout(outputStream, inputStream, "You have successfully logged out");
                 break;
             default:
-                System.out.println("Such command is not available (You are logged in).");
+                if (inCommandHandler) inCommandHandler = false;
+                else System.out.println("Such command is not available (You are logged in).");
+
         }
     }
 
