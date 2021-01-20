@@ -1,6 +1,6 @@
 # cloud-storage
 
-Welcome to Cloud Storage client. Here are its console commands. Please don't use file names which contains spaces.
+Welcome to Cloud Storage client. Here are its console commands. Please don't use file names which contain spaces.
 
 upld file_name
 Uploads file named file_name to cloud storage. File name shall not contain spaces.
@@ -34,6 +34,9 @@ Logs in.
 
 logout
 Logs out.
+
+help
+Prints all the commands.
 
 register username password nickname
 Registers new user. !!! This command is under development !!!

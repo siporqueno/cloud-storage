@@ -6,6 +6,6 @@ import io.netty.channel.ChannelHandlerContext;
 import java.io.IOException;
 
 public interface State {
-    State receiveCommand();
-    boolean processCommand(ChannelHandlerContext ctx) throws IOException;
+    State receiveCommand(ByteBuf buf, ByteBuf bufOut);
+    boolean processCommand(ChannelHandlerContext ctx, ByteBuf buf, ByteBuf bufOut) throws IOException;
 }

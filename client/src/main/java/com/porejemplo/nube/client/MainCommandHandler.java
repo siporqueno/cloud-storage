@@ -21,7 +21,7 @@ public class MainCommandHandler extends CommandHandler {
     private final ConsoleClient consoleClient;
     private final UploadService uploadService;
     private final DownloadService downloadService;
-    private Path pathToUserDir;
+    private final Path pathToUserDir;
 
     public MainCommandHandler(ConsoleClient consoleClient, DataOutputStream out, DataInputStream in) {
         this.consoleClient = consoleClient;
@@ -30,6 +30,7 @@ public class MainCommandHandler extends CommandHandler {
         this.uploadService = new IOUploadService(out);
     }
 
+    @Override
     void handle(DataOutputStream outputStream, DataInputStream inputStream, Command command, List<String> arguments) throws ArgumentException, IOException {
         super.handle(outputStream, inputStream, command, arguments);
         command.checkArguments(arguments);
@@ -74,7 +75,9 @@ public class MainCommandHandler extends CommandHandler {
                 logout(outputStream, inputStream, "You have successfully logged out");
                 break;
             default:
-                System.out.println("Such command is not available (You are logged in).");
+                if (inCommandHandler) inCommandHandler = false;
+                else System.out.println("Such command is not available (You are logged in).");
+
         }
     }
 

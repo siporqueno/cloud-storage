@@ -1,11 +1,11 @@
 package com.porejemplo.nube.client;
 
-import com.porejemplo.nube.client.service.IODownloadService;
-import com.porejemplo.nube.client.service.IOUploadService;
 import com.porejemplo.nube.common.ArgumentException;
 import com.porejemplo.nube.common.Command;
 
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,8 +14,8 @@ import java.util.List;
 public class AuthRegCommandHandler extends CommandHandler {
 
     private final ConsoleClient consoleClient;
-    private DataOutputStream out;
-    private DataInputStream in;
+    private final DataOutputStream out;
+    private final DataInputStream in;
 
     public AuthRegCommandHandler(ConsoleClient consoleClient, DataOutputStream out, DataInputStream in) {
         this.consoleClient = consoleClient;
@@ -23,6 +23,7 @@ public class AuthRegCommandHandler extends CommandHandler {
         this.in = in;
     }
 
+    @Override
     void handle(DataOutputStream outputStream, DataInputStream inputStream, Command command, List<String> arguments) throws ArgumentException, IOException {
         super.handle(outputStream, inputStream, command, arguments);
         command.checkArguments(arguments);
@@ -42,7 +43,8 @@ public class AuthRegCommandHandler extends CommandHandler {
             case EXIT:
                 break;
             default:
-                System.out.println("Such command is not available (You are logged out).");
+                if (inCommandHandler) inCommandHandler = false;
+                else System.out.println("Such command is not available (You are logged out).");
         }
     }
 

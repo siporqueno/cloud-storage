@@ -1,11 +1,11 @@
 package com.porejemplo.nube.client;
 
-import com.porejemplo.nube.client.service.IODownloadService;
-import com.porejemplo.nube.client.service.IOUploadService;
 import com.porejemplo.nube.common.ArgumentException;
 import com.porejemplo.nube.common.Command;
 
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.List;
