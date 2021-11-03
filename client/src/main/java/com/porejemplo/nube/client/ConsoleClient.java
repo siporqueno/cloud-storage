@@ -21,8 +21,8 @@ public class ConsoleClient {
     private final Scanner scanner = new Scanner(System.in);
 
     private boolean authOk = false;
-    private AuthRegCommandHandler authRegCommandHandler;
-    private MainCommandHandler mainCommandHandler;
+    private CommandHandler authRegCommandHandler;
+    private CommandHandler mainCommandHandler;
     private String username;
 
     public ConsoleClient() {
@@ -30,7 +30,7 @@ public class ConsoleClient {
              DataOutputStream out = new DataOutputStream(socket.getOutputStream());
              DataInputStream in = new DataInputStream(socket.getInputStream());) {
 
-            authRegCommandHandler = new AuthRegCommandHandler(this, out, in);
+            authRegCommandHandler = new CommonCommandHandlerDecorator(new AuthRegCommandHandler(this, out, in));
             scanner.useDelimiter("\\n");
             runClient(out, in);
 
@@ -49,11 +49,11 @@ public class ConsoleClient {
         this.username = username;
     }
 
-    public MainCommandHandler getMainCommandHandler() {
+    public CommandHandler getMainCommandHandler() {
         return mainCommandHandler;
     }
 
-    public void setMainCommandHandler(MainCommandHandler mainCommandHandler) {
+    public void setMainCommandHandler(CommandHandler mainCommandHandler) {
         this.mainCommandHandler = mainCommandHandler;
     }
 

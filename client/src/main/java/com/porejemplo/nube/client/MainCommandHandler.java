@@ -32,7 +32,6 @@ public class MainCommandHandler extends CommandHandler {
 
     @Override
     void handle(DataOutputStream outputStream, DataInputStream inputStream, Command command, List<String> arguments) throws ArgumentException, IOException {
-        super.handle(outputStream, inputStream, command, arguments);
         command.checkArguments(arguments);
         switch (command) {
             case LSLC:
@@ -75,8 +74,7 @@ public class MainCommandHandler extends CommandHandler {
                 logout(outputStream, inputStream, "You have successfully logged out");
                 break;
             default:
-                if (inCommandHandler) inCommandHandler = false;
-                else System.out.println("Such command is not available (You are logged in).");
+                System.out.println("Such command is not available (You are logged in).");
 
         }
     }

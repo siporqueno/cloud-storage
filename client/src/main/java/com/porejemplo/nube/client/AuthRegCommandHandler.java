@@ -25,7 +25,6 @@ public class AuthRegCommandHandler extends CommandHandler {
 
     @Override
     void handle(DataOutputStream outputStream, DataInputStream inputStream, Command command, List<String> arguments) throws ArgumentException, IOException {
-        super.handle(outputStream, inputStream, command, arguments);
         command.checkArguments(arguments);
         switch (command) {
             case LOGIN:
@@ -33,7 +32,7 @@ public class AuthRegCommandHandler extends CommandHandler {
                     consoleClient.setUsername(arguments.get(0));
                     Path path = Paths.get(consoleClient.STORAGE_ROOT, consoleClient.getUsername());
                     if (Files.notExists(path)) Files.createDirectory(path);
-                    consoleClient.setMainCommandHandler(new MainCommandHandler(consoleClient, out, in));
+                    consoleClient.setMainCommandHandler( new CommonCommandHandlerDecorator(new MainCommandHandler(consoleClient, out, in)));
                     consoleClient.setAuthOk(true);
                 }
                 break;
@@ -43,8 +42,7 @@ public class AuthRegCommandHandler extends CommandHandler {
             case EXIT:
                 break;
             default:
-                if (inCommandHandler) inCommandHandler = false;
-                else System.out.println("Such command is not available (You are logged out).");
+                System.out.println("Such command is not available (You are logged out).");
         }
     }
 
