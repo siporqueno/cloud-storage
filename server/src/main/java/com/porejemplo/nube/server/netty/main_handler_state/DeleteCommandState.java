@@ -1,6 +1,6 @@
 package com.porejemplo.nube.server.netty.main_handler_state;
 
-import com.porejemplo.nube.common.Command;
+import com.porejemplo.nube.common.Signal;
 import com.porejemplo.nube.server.netty.MainHandler;
 import com.porejemplo.nube.server.netty.Phase;
 import com.porejemplo.nube.server.netty.State;
@@ -59,7 +59,7 @@ public class DeleteCommandState implements State {
                 mH.setCurrentPhase(Phase.DELETE_FILE);
             } else {
                 bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
-                bufOut.writeByte(Command.DELCL.getFailureByte());
+                bufOut.writeByte(Signal.DELCL.getFailureByte());
                 ctx.writeAndFlush(bufOut);
                 MainHandler.getLOGGER().info("File name not verified. No such file");
                 mH.setCurrentPhase(Phase.IDLE);
@@ -72,7 +72,7 @@ public class DeleteCommandState implements State {
             MainHandler.getLOGGER().info("STATE: File deleting");
             Files.delete(path);
             bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
-            bufOut.writeByte(Command.DELCL.getSignalByte());
+            bufOut.writeByte(Signal.DELCL.getSignalByte());
             ctx.writeAndFlush(bufOut);
             mH.setCurrentPhase(Phase.IDLE);
         }

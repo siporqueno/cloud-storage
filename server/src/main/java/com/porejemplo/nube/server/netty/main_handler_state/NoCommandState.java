@@ -1,6 +1,6 @@
 package com.porejemplo.nube.server.netty.main_handler_state;
 
-import com.porejemplo.nube.common.Command;
+import com.porejemplo.nube.common.Signal;
 import com.porejemplo.nube.server.netty.MainHandler;
 import com.porejemplo.nube.server.netty.Phase;
 import com.porejemplo.nube.server.netty.State;
@@ -19,13 +19,13 @@ public class NoCommandState implements State {
     public State receiveCommand(ByteBuf buf, ByteBuf bufOut) {
         if (mH.getCurrentPhase() == Phase.IDLE) {
             byte signalByte = buf.readByte();
-            Command command = null;
+            Signal signal = null;
             try {
-                command = Command.findCommandBySignalByte(signalByte);
+                signal = Signal.findSignalBySignalByte(signalByte);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            switch (command) {
+            switch (signal) {
                 case LSCL:
                     mH.setCurrentPhase(Phase.FILES_LIST);
                     MainHandler.getLOGGER().info("STATE: Start to obtain file list in server");

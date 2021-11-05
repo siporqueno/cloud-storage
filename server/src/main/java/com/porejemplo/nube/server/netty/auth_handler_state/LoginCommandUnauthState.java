@@ -1,6 +1,6 @@
 package com.porejemplo.nube.server.netty.auth_handler_state;
 
-import com.porejemplo.nube.common.Command;
+import com.porejemplo.nube.common.Signal;
 import com.porejemplo.nube.server.auth.service.AuthService;
 import com.porejemplo.nube.server.netty.AuthHandler;
 import com.porejemplo.nube.server.netty.MainHandler;
@@ -84,14 +84,14 @@ public class LoginCommandUnauthState implements State {
                 }
 
                 bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
-                bufOut.writeByte(Command.LOGIN.getSignalByte());
+                bufOut.writeByte(Signal.LOGIN.getSignalByte());
                 ctx.writeAndFlush(bufOut);
                 aH.setCurrentState(aH.getAuthStateOfAuthHandler());
                 ctx.pipeline().addLast(new MainHandler(aH));
                 AuthHandler.getLOGGER().info("Correct username and password.");
             } else {
                 bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
-                bufOut.writeByte(Command.LOGIN.getFailureByte());
+                bufOut.writeByte(Signal.LOGIN.getFailureByte());
                 ctx.writeAndFlush(bufOut);
                 aH.setCurrentState(aH.getUnauthNoCommandReceivedStateOfAuthHandler());
                 AuthHandler.getLOGGER().info("Wrong username and/or password.");

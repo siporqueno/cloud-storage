@@ -1,7 +1,11 @@
 package com.porejemplo.nube.client;
 
+import com.porejemplo.nube.client.handler.AuthRegHandler;
+import com.porejemplo.nube.client.handler.CommonHandler;
+import com.porejemplo.nube.client.handler.Handler;
+import com.porejemplo.nube.client.handler.MainHandler;
 import com.porejemplo.nube.common.ArgumentException;
-import com.porejemplo.nube.common.Command;
+import com.porejemplo.nube.common.Signal;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -16,21 +20,21 @@ public class ConsoleClient {
 
     public static final int PORT = 8189;
     public static final String HOST = "localhost";
-    final String STORAGE_ROOT = "client_storage";
+    final static String STORAGE_ROOT = "client_storage";
 
     private final Scanner scanner = new Scanner(System.in);
 
     private boolean authOk = false;
-    private AuthRegCommandHandler authRegCommandHandler;
-    private MainCommandHandler mainCommandHandler;
     private String username;
+    private Handler mainChain;
+    private Handler authRegChain;
 
     public ConsoleClient() {
         try (Socket socket = new Socket(HOST, PORT);
              DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-             DataInputStream in = new DataInputStream(socket.getInputStream());) {
-
-            authRegCommandHandler = new AuthRegCommandHandler(this, out, in);
+             DataInputStream in = new DataInputStream(socket.getInputStream())) {
+            authRegChain = new CommonHandler();
+            authRegChain.link(new AuthRegHandler(this, out, in));
             scanner.useDelimiter("\\n");
             runClient(out, in);
 
@@ -49,12 +53,9 @@ public class ConsoleClient {
         this.username = username;
     }
 
-    public MainCommandHandler getMainCommandHandler() {
-        return mainCommandHandler;
-    }
-
-    public void setMainCommandHandler(MainCommandHandler mainCommandHandler) {
-        this.mainCommandHandler = mainCommandHandler;
+    public void initMainChain(ConsoleClient consoleClient, DataOutputStream out, DataInputStream in) {
+       this.mainChain = new CommonHandler();
+       this.mainChain.link(new MainHandler(consoleClient, out, in));
     }
 
     public boolean isAuthOk() {
@@ -65,6 +66,10 @@ public class ConsoleClient {
         this.authOk = authOk;
     }
 
+    public String getSTORAGE_ROOT() {
+        return STORAGE_ROOT;
+    }
+
     private void runClient(DataOutputStream outputStream, DataInputStream inputStream) throws IOException {
         System.out.println("Welcome to Cloud storage client!");
         while (true) {
@@ -72,10 +77,14 @@ public class ConsoleClient {
             String response = scanner.next();
             String[] respTokens = response.split(" ");
             try {
-                Command command = Command.valueOf(respTokens[0].toUpperCase());
+                Signal signal = Signal.valueOf(respTokens[0].toUpperCase());
                 List<String> arguments = Arrays.stream(respTokens).skip(1).collect(Collectors.toList());
-                if (authOk) mainCommandHandler.handle(outputStream, inputStream, command, arguments);
-                else authRegCommandHandler.handle(outputStream, inputStream, command, arguments);
+
+                if (authOk) {
+                    mainChain.handle(signal, arguments);
+                } else {
+                    authRegChain.handle(signal, arguments);
+                }
 
             } catch (IllegalArgumentException e) {
                 System.out.printf("The command %s does not exist!\n", respTokens[0]);

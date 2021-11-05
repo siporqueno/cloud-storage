@@ -1,6 +1,6 @@
 package com.porejemplo.nube.client.service;
 
-import com.porejemplo.nube.common.Command;
+import com.porejemplo.nube.common.Signal;
 
 import java.io.DataOutput;
 import java.io.FileInputStream;
@@ -18,7 +18,7 @@ public class IOUploadService implements UploadService {
 
     @Override
     public boolean upload(Path path) throws IOException {
-        out.writeByte(Command.UPLD.getSignalByte());
+        out.writeByte(Signal.UPLD.getSignalByte());
         String fileName = path.getFileName().toString();
         int fileNameLength = fileName.length();
         out.writeInt(fileNameLength);

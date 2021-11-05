@@ -1,6 +1,6 @@
 package com.porejemplo.nube.server.netty.main_handler_state;
 
-import com.porejemplo.nube.common.Command;
+import com.porejemplo.nube.common.Signal;
 import com.porejemplo.nube.server.netty.MainHandler;
 import com.porejemplo.nube.server.netty.Phase;
 import com.porejemplo.nube.server.netty.State;
@@ -63,12 +63,12 @@ public class DownloadCommandState implements State {
             if (Files.exists(path)) {
                 bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
                 MainHandler.getLOGGER().info("File name verified");
-                bufOut.writeByte(Command.DNLD.getSignalByte());
+                bufOut.writeByte(Signal.DNLD.getSignalByte());
                 ctx.writeAndFlush(bufOut);
                 mH.setCurrentPhase(Phase.FILE_DESPATCH);
             } else {
                 bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
-                bufOut.writeByte(Command.DNLD.getFailureByte());
+                bufOut.writeByte(Signal.DNLD.getFailureByte());
                 ctx.writeAndFlush(bufOut);
                 MainHandler.getLOGGER().info("File name not verified. No such file");
                 mH.setCurrentPhase(Phase.IDLE);
