@@ -1,6 +1,6 @@
 package com.porejemplo.nube.server.netty.auth_handler_state;
 
-import com.porejemplo.nube.common.Command;
+import com.porejemplo.nube.common.Signal;
 import com.porejemplo.nube.server.netty.AuthHandler;
 import com.porejemplo.nube.server.netty.Phase;
 import com.porejemplo.nube.server.netty.State;
@@ -19,13 +19,13 @@ public class NoCommandUnauthState implements State {
     public State receiveCommand(ByteBuf buf, ByteBuf bufOut) {
         if (aH.getCurrentPhase() == Phase.IDLE) {
             byte signalByte = buf.readByte();
-            Command command = null;
+            Signal signal = null;
             try {
-                command = Command.findCommandBySignalByte(signalByte);
+                signal = Signal.findSignalBySignalByte(signalByte);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            switch (command) {
+            switch (signal) {
                 case LOGIN:
                     aH.setCurrentPhase(Phase.USERNAME_LENGTH);
                     AuthHandler.getLOGGER().info("STATE: Start to check username and password.");

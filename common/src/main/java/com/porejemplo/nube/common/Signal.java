@@ -1,11 +1,10 @@
 package com.porejemplo.nube.common;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public enum Command {
+public enum Signal {
 
     UPLD("upld", "upld file_name\nUploads file named file_name to cloud storage. File name shall not contain spaces.", 1, (byte) 15, (byte) -1),
     DNLD("dnld", "dnld file_name\nDownloads file named file_name from cloud storage. File name shall not contain spaces.", 1, (byte) 16, (byte) 17),
@@ -21,10 +20,10 @@ public enum Command {
     REG("register", "register username password nickname\nRegisters new user.", 0, (byte) 24, (byte) 25),
     HELP("help", "help\nPrints all the commands.", 0, (byte) -1, (byte) -1);
 
-    private static final Map<Byte, Command> commands = new HashMap<>();
+    private static final Map<Byte, Signal> signals = new HashMap<>();
 
     static {
-        for (Command value : Command.values()) commands.put(value.getSignalByte(), value);
+        for (Signal value : Signal.values()) signals.put(value.getSignalByte(), value);
     }
 
     private final String name;
@@ -33,7 +32,7 @@ public enum Command {
     private final byte signalByte;
     private final byte failureByte;
 
-    Command(String name, String description, int requiredArgumentsNumber, byte signalByte, byte failureByte) {
+    Signal(String name, String description, int requiredArgumentsNumber, byte signalByte, byte failureByte) {
         this.name = name;
         this.description = description;
         this.requiredArgumentsNumber = requiredArgumentsNumber;
@@ -60,9 +59,9 @@ public enum Command {
         return true;
     }
 
-    public static Command findCommandBySignalByte(byte receivedSignalByte) throws Exception {
-        Command command = commands.get(receivedSignalByte);
-        if (command != null) return command;
-        throw new CommandNotFoundException(receivedSignalByte);
+    public static Signal findSignalBySignalByte(byte receivedSignalByte) throws Exception {
+        Signal signal = signals.get(receivedSignalByte);
+        if (signal != null) return signal;
+        throw new SignalNotFoundException(receivedSignalByte);
     }
 }

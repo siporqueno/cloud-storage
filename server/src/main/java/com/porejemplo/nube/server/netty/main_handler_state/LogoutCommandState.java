@@ -1,6 +1,6 @@
 package com.porejemplo.nube.server.netty.main_handler_state;
 
-import com.porejemplo.nube.common.Command;
+import com.porejemplo.nube.common.Signal;
 import com.porejemplo.nube.server.netty.MainHandler;
 import com.porejemplo.nube.server.netty.Phase;
 import com.porejemplo.nube.server.netty.State;
@@ -8,9 +8,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelHandlerContext;
 
-import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.nio.file.Path;
 
 public class LogoutCommandState implements State {
 
@@ -31,7 +29,7 @@ public class LogoutCommandState implements State {
         if (mH.getCurrentPhase() == Phase.LOGOUT) {
             mH.getAH().setCurrentState(mH.getAH().getUnauthNoCommandReceivedStateOfAuthHandler());
             bufOut = ByteBufAllocator.DEFAULT.directBuffer(1);
-            bufOut.writeByte(Command.LOGOUT.getSignalByte());
+            bufOut.writeByte(Signal.LOGOUT.getSignalByte());
             ctx.writeAndFlush(bufOut.retain());
             MainHandler.getLOGGER().info("STATE: Logging out");
             ctx.pipeline().remove(mH);

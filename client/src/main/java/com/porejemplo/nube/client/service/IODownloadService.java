@@ -1,12 +1,12 @@
 package com.porejemplo.nube.client.service;
 
-import com.porejemplo.nube.common.Command;
+import com.porejemplo.nube.common.Signal;
 
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static com.porejemplo.nube.common.Command.DNLD;
+import static com.porejemplo.nube.common.Signal.DNLD;
 
 public class IODownloadService implements DownloadService {
     private final DataOutput out;
@@ -28,7 +28,7 @@ public class IODownloadService implements DownloadService {
         byte signalByte = in.readByte();
         if (signalByte == DNLD.getSignalByte()) {
             System.out.println("Great. Such file found.");
-        } else if (signalByte == Command.DELLC.getFailureByte()) {
+        } else if (signalByte == Signal.DELLC.getFailureByte()) {
             System.out.println("No such file in the Cloud. Please double check file name.");
             return false;
         }
