@@ -1,6 +1,7 @@
 package com.porejemplo.nube.server.netty.auth_handler_state;
 
 import com.porejemplo.nube.common.Command;
+import com.porejemplo.nube.common.dto.UserAuthDto;
 import com.porejemplo.nube.server.auth.service.AuthService;
 import com.porejemplo.nube.server.netty.AuthHandler;
 import com.porejemplo.nube.server.netty.MainHandler;
@@ -19,9 +20,9 @@ public class LoginCommandUnauthState implements State {
 
     private int usernameLength;
     private int passwordLength;
-    private String username;
-    private String password;
-
+    //    private String username;
+//    private String password;
+    private UserAuthDto user;
     private final AuthHandler aH;
     private final AuthService authService;
 
@@ -58,13 +59,13 @@ public class LoginCommandUnauthState implements State {
             if (buf.readableBytes() >= usernameLength + passwordLength) {
                 byte[] usernameBytes = new byte[usernameLength];
                 buf.readBytes(usernameBytes);
-                username = new String(usernameBytes, StandardCharsets.UTF_8);
-                AuthHandler.getLOGGER().info("STATE: username received - " + username);
+                user.setUsername(new String(usernameBytes, StandardCharsets.UTF_8));
+                AuthHandler.getLOGGER().info("STATE: username received - " + user.getUsername());
 
                 byte[] passwordBytes = new byte[passwordLength];
                 buf.readBytes(passwordBytes);
-                password = new String(passwordBytes, StandardCharsets.UTF_8);
-                AuthHandler.getLOGGER().info("STATE: New password received - " + password);
+                user.setPassword(new String(passwordBytes, StandardCharsets.UTF_8));
+                AuthHandler.getLOGGER().info("STATE: New password received - " + user.getPassword());
 
                 aH.setCurrentPhase(Phase.VERIFY_USERNAME_AND_PASSWORD);
             } else return false;
@@ -72,8 +73,8 @@ public class LoginCommandUnauthState implements State {
 
         if (aH.getCurrentPhase() == Phase.VERIFY_USERNAME_AND_PASSWORD) {
             AuthHandler.getLOGGER().info("STATE: username and password verification ");
-            if (authService.verifyUsernameAndPassword(username, password)) {
-                aH.setPathToUserDir(Paths.get(aH.getSTORAGE_ROOT(), username));
+            if (authService.verifyUsernameAndPassword(user)) {
+                aH.setPathToUserDir(Paths.get(aH.getSTORAGE_ROOT(), user.getUsername()));
                 if (Files.notExists(aH.getPathToUserDir())) {
                     try {
                         Files.createDirectory(aH.getPathToUserDir());

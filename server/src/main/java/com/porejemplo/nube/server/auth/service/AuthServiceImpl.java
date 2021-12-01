@@ -1,5 +1,6 @@
 package com.porejemplo.nube.server.auth.service;
 
+import com.porejemplo.nube.common.dto.UserAuthDto;
 import com.porejemplo.nube.server.auth.entity.User;
 import com.porejemplo.nube.server.auth.repository.UserDAO;
 import com.porejemplo.nube.server.auth.repository.UserIdentityMap;
@@ -16,7 +17,11 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public boolean verifyUsernameAndPassword(String givenUsername, String givenPassword) {
+//    public boolean verifyUsernameAndPassword(String givenUsername, String givenPassword) {
+    public boolean verifyUsernameAndPassword(UserAuthDto givenUser) {
+        String givenUsername = givenUser.getUsername();
+        String givenPassword = givenUser.getPassword();
+
         Objects.requireNonNull(givenUsername);
         Objects.requireNonNull(givenPassword);
 
