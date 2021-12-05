@@ -1,0 +1,113 @@
+openapi: 3.0.3
+info:
+  title: Server Admin REST API
+  description: Админка для управления пользователями облачного хранилища
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:8080/admin/api/v1'
+paths:
+  /user:
+    get:
+      tags:
+        - Все пользователи
+      summary: Список пользователей
+      description: Возвращает список всех пользователей.
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserDto'
+    post:
+      tags:
+        - Создать пользователя
+      summary: Создаёт нового пользователя
+      description: Создание нового пользователя на основании переданных параметров
+      responses:
+        201:
+          description: CREATED
+          content:
+            text/plain:
+              schema:
+                type: string
+        default:
+          $ref: '#/components/responses/DefaultResponse'
+      parameters:
+        - $ref: '#/components/parameters/createOrUpdateUserDto'
+    put:
+      tags:
+        - Изменить пользователя
+      summary: Изменяет существующего пользователя
+      description: Изменение существующего пользователя на основании переданных параметров
+      responses:
+        202:
+          description: ACCEPTED
+          content:
+            text/plain:
+              schema:
+                type: string
+        default:
+          $ref: '#/components/responses/DefaultResponse'
+      parameters:
+        - $ref: '#/components/parameters/createOrUpdateUserDto'
+    delete:
+      tags:
+        - Удалить пользователя
+      summary: Удаляет пользователя
+      description: Удаление существующего пользователя по его id
+      responses:
+        204:
+          description: ENACTED
+        default:
+          $ref: '#/components/responses/DefaultResponse'
+      parameters:
+        - name: id
+          in: query
+          description: id пользователя
+          required: true
+          schema:
+            type: integer
+components:
+  parameters:
+    createOrUpdateUserDto:
+      in: query
+      name: createOrUpdateUserDto
+      description: объект UserDto для создания или изменения пользователя
+      required: true
+      schema:
+        $ref: '#/components/schemas/UserDto'
+  responses:
+    DefaultResponse:
+      description: Ошибка
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AdminBackendGenericError'
+  schemas:
+    UserDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        password:
+          type: string
+        nickname:
+          type: string
+    AdminBackendGenericError:
+      type: object
+      properties:
+        status:
+          type: integer
+        message:
+          type: string
+        date:
+          type: string
+
+
+
+  
