@@ -1,0 +1,13 @@
+.openapi-generator-ignore
+README.md
+pom.xml
+src/main/java/com/porejemplo/nube/OpenAPI2SpringBoot.java
+src/main/java/com/porejemplo/nube/RFC3339DateFormat.java
+src/main/java/com/porejemplo/nube/api/ApiUtil.java
+src/main/java/com/porejemplo/nube/api/UserApi.java
+src/main/java/com/porejemplo/nube/api/UserApiController.java
+src/main/java/com/porejemplo/nube/model/AdminBackendGenericError.java
+src/main/java/com/porejemplo/nube/model/UserDto.java
+src/main/java/org/openapitools/configuration/HomeController.java
+src/main/java/org/openapitools/configuration/OpenAPIDocumentationConfig.java
+src/main/resources/application.properties
